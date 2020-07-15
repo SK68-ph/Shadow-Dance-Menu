@@ -1,6 +1,7 @@
 #pragma once
 #include <Windows.h>
 #include <d3d11.h>
+#include <D3DX11.h>
 #include <dxgi.h>
 #include "kiero/kiero.h"
 #include "imgui/imgui.h"
@@ -11,6 +12,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <vector>
 
 typedef HRESULT(__stdcall* Present) (IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT Flags);
 typedef LRESULT(CALLBACK* WNDPROC)(HWND, UINT, WPARAM, LPARAM);

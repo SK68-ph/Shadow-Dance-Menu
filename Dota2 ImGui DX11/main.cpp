@@ -45,7 +45,7 @@ std::vector<unsigned int> getOffsetFromText() {
 	//Open text file
 	file.open("C:\\Users\\Skrixx\\Desktop\\Dota2Overlay\\offs.conf", std::ios::out | std::ios::in);
 	if (file.fail()) {
-		MessageBoxExW(NULL, (LPCWSTR)"Config file not found", (LPCWSTR)"ERROR", NULL, NULL);
+		MessageBox(NULL, "Config file not found", "ERROR", NULL);
 	}
 
 	int i = 0;
