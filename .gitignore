@@ -73,3 +73,5 @@ x64/Release/Dota2 ImGui Menu.pdb
 .vs/Dota2 ImGui DX11/v16/ipch/AutoPCH/5758d6917fddcd9b/DRAW.ipch
 .vs/Dota2 ImGui DX11/v16/ipch/AutoPCH/fd5d966aa13e77e6/DRAW.ipch
 Dota2 ImGui DX11/x64/Release/Draw.obj
+Dota2 ImGui DX11/x64/Release/Dota2 ImGui Menu.Build.CppClean.log
+Dota2 ImGui DX11/x64/Release/ImGui DirectX 11 Kiero Hook.vcxproj.FileListAbsolute.txt
