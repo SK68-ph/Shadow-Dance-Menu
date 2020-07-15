@@ -131,11 +131,6 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 	{
 		if (GetAsyncKeyState(VK_END) & 1)
 		{
-			//clean memory
-			fclose(f);
-			FreeConsole();
-			//close main thread
-			FreeLibraryAndExitThread(hModule, 0);
 			kiero::shutdown();
 			exit(0);
 			return 0;
@@ -231,9 +226,6 @@ BOOL WINAPI DllMain(HMODULE hMod, DWORD dwReason, LPVOID lpReserved)
 	{
 	case DLL_PROCESS_ATTACH:
 		DisableThreadLibraryCalls(hMod);
-		FreeConsole();
-		AllocConsole();
-		freopen_s(&f, "CONOUT$", "w", stdout);
 		CloseHandle(CreateThread(nullptr, 0, MainThread, hMod, 0, nullptr));
 		break;
 	case DLL_PROCESS_DETACH:

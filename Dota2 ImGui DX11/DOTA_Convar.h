@@ -16,9 +16,11 @@ public:
     //Populate vars
     void Init() {
         engine2ModBase = getEngine2BaseAddress();
-        cmdOffset = 0x46FA0;            // feature pattern scan soon.
-        sv_cheatOffsets = 0x540CD8;     // 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 20 0B 7B CB 69 01 00 00 04 00 00 00 00 00 00 00 = 48bytes
+        cmdOffset = 0x467D0;            // feature pattern scan soon.
+        sv_cheatOffsets = 0x548928;     // 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 ?0 0B ?? ?? ?? ?? 00 00 04 00 00 00 00 00 00 00 = 48bytes
+                                        // xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx?x????xxxxxxxxxx
         SV_CHEATS(true);
+
     }
 
     //Push command to console
