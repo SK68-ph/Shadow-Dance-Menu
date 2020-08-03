@@ -5,6 +5,8 @@
 
 
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+unsigned int ReadVBE(uintptr_t dynamicAddr, std::vector<unsigned int> offsets);
+std::vector<unsigned int> getOffsetFromText();
 
 Present oPresent;
 HWND window = NULL;
@@ -35,36 +37,7 @@ LRESULT __stdcall WndProc(const HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 }
 
 //Read offsets from config file.
-std::vector<unsigned int> getOffsetFromText() {
 
-	std::fstream file;
-	std::string word;
-	std::vector<std::string> offsets;
-	std::vector<unsigned int> offsetsInt;
-
-	//Open text file
-	file.open("C:\\Users\\Skrixx\\Desktop\\Dota2Overlay\\offs.conf", std::ios::out | std::ios::in);
-	if (file.fail()) {
-		MessageBox(NULL, "Config file not found", "ERROR", NULL);
-	}
-
-	int i = 0;
-	while (file >> word)
-	{
-		if (i >= 8) break;
-
-		offsets.push_back(word);
-		i++;
-	}
-	for (size_t i = 0; i < offsets.size(); i++)
-	{
-		std::istringstream buffer(offsets[i]);
-		unsigned long long value;
-		buffer >> std::hex >> value;
-		offsetsInt.push_back(value);
-	}
-	return offsetsInt;
-}
 
 
 MemIn meme;
@@ -82,13 +55,19 @@ bool mainhackInit()
 }
 
 bool init = false;
+bool Exit = false;
 bool bShowMenu = true;
 bool bVBE = false,bDrawRange = false,bParticleHack = false,bNoFog = false;
 int camDistance = 1300;
-
+static int item_current = 0;
 
 HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT Flags)
 {
+	if (Exit == true)
+	{
+		return oPresent(pSwapChain, SyncInterval, Flags);
+	}
+
 	if (!init)
 	{
 
@@ -121,6 +100,7 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 	//temporary vars
 	bool tempBVBE = bVBE, tempBDrawRange = bDrawRange, tempBParticleHack = bParticleHack, tempBNoFog = bNoFog;
 	int tempBcamDistance = camDistance;
+	int weather_item = item_current;
 
 	ImGui_ImplDX11_NewFrame();
 	ImGui_ImplWin32_NewFrame();
@@ -129,51 +109,38 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 	//Menu logic
 	if (bShowMenu)
 	{
-		if (GetAsyncKeyState(VK_END) & 1)
-		{
-			kiero::shutdown();
-			exit(0);
-			return 0;
-		}
 
-		ImGui::Begin("Dota2 Menu");
+		ImGui::Begin("Skrixx Dota2 Menu");
 		ImGui::SetWindowFontScale(1.20f);
+
 		ImGui::Text("Visuals");
+		//VBE
 		ImGui::Checkbox("Overlay Visible by enemy.", &bVBE);
+		//Circle Range
 		ImGui::Checkbox("Draw Dagger Circle Range.", &bDrawRange);
-		ImGui::SliderInt("CameraDistance", &camDistance, 0, 3000, "%d");
+		//Weather
+		const char* items[] = { "Default", "Winter", "Rain", "MoonBeam", "Pestilence", "Harvest", "Sirocco", "Spring", "Ash", "Aurora" };
+
+		ImGui::Dummy(ImVec2(1, 30));
+		ImGui::Text("Weather");
+		ImGui::ListBox("", &item_current, items, IM_ARRAYSIZE(items), 4);
+
 		ImGui::Dummy(ImVec2(1,30));
+
 		ImGui::Text("Hacks");
 		ImGui::Checkbox("Map Fog.", &bNoFog);
 		ImGui::Checkbox("Particle Map Hack.", &bParticleHack);
+		
 		ImGui::End();
-
 	}
 
-	//Hack logic
-	if (bVBE)
+
+	if (weather_item != item_current)
 	{
-		uintptr_t dynamicAddr = engine2BaseAddr + offsets[0];
-		uintptr_t vbEAddr = meme.ReadMultiLevelPointer(dynamicAddr, offsets,true);
-		int* vbEVal = (int*)vbEAddr;
-		if (vbEVal != 0)
-		{
-			if (*vbEVal == 14) // Visible by enemy
-			{
-				cout << "visible" << endl;
-
-			}
-			else if (*vbEVal >= 6 && *vbEVal <= 10) // Not visible by enemy
-			{
-				cout << "not visible" << endl;
-			}
-		}
-		else 
-		{
-			cout << "not found" << endl;
-		}
+		std::string tempCmnd = (cmd.stringBuild(listCommands::d_cl_weather, item_current));
+		const char* chrCommand = const_cast<char*>(tempCmnd.c_str());
+		cmd.ExecuteCmd(chrCommand);
 	}
-
 	if (tempBDrawRange != bDrawRange)
 	{
 		std::string tempCmnd = (cmd.stringBuild(listCommands::d_range_display, 1200));
@@ -205,7 +172,7 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 	return oPresent(pSwapChain, SyncInterval, Flags);
 }
 
-DWORD WINAPI MainThread(LPVOID lpReserved)
+DWORD WINAPI MainThread(HMODULE hModule)
 {
 	bool init_hook = false;
 	do
@@ -216,21 +183,80 @@ DWORD WINAPI MainThread(LPVOID lpReserved)
 			init_hook = true;
 		}
 	} while (!init_hook);
-	return TRUE;
+
+	while (!GetAsyncKeyState(VK_DELETE))
+	{
+		Sleep(1);
+	}
+	Exit = true;
+	kiero::shutdown();
+
+	FreeLibraryAndExitThread(hModule, 0);
 }
 
-BOOL WINAPI DllMain(HMODULE hMod, DWORD dwReason, LPVOID lpReserved)
+BOOL WINAPI DllMain(HMODULE hModule, DWORD dwReason, LPVOID lpReserved)
 {
-	hModule = hMod;
-	switch (dwReason)
+	if (dwReason == DLL_PROCESS_ATTACH)
 	{
-	case DLL_PROCESS_ATTACH:
-		DisableThreadLibraryCalls(hMod);
-		CloseHandle(CreateThread(nullptr, 0, MainThread, hMod, 0, nullptr));
-		break;
-	case DLL_PROCESS_DETACH:
-		kiero::shutdown();
-		break;
+		DisableThreadLibraryCalls(hModule);
+		CloseHandle(CreateThread(nullptr, 0, (LPTHREAD_START_ROUTINE)MainThread, hModule, 0, nullptr));
+
 	}
 	return TRUE;
+}
+//Read Address of Visible by enemy tag in memory
+unsigned int ReadVBE(uintptr_t dynamicAddr, std::vector<unsigned int> offsets)
+{
+	uintptr_t vbEAddr = meme.ReadMultiLevelPointer(dynamicAddr, offsets, true);
+	if (vbEAddr == 0)
+	{
+		return 3;
+	}
+	int* vbEVal = (int*)vbEAddr;
+	if (*vbEVal == 14) // Visible by enemy
+	{
+		return 1;
+	}
+	else if (*vbEVal >= 6 && *vbEVal <= 10) // Not visible by enemy
+	{
+		return 0;
+	}
+	return 3;
+}
+std::vector<unsigned int> getOffsetFromText() {
+
+	std::fstream file;
+	std::string word;
+	std::vector<std::string> offsets;
+	std::vector<unsigned int> offsetsInt;
+
+	CHAR czTempPath[MAX_PATH] = { 0 };
+	GetTempPathA(MAX_PATH, czTempPath); // retrieving temp path
+	std::string sPath = czTempPath;
+	sPath += "offs.conf";
+
+	//Open text file
+	file.open(sPath, std::ios::out | std::ios::in);
+	if (file.fail()) {
+		MessageBox(NULL, "Config file not found", "ERROR", NULL);
+	}
+
+	int i = 0;
+	while (file >> word)
+	{
+		if (i >= 8) break;
+
+		offsets.push_back(word);
+		i++;
+	}
+	for (size_t i = 0; i < offsets.size(); i++)
+	{
+		std::istringstream buffer(offsets[i]);
+		unsigned long long value;
+		buffer >> std::hex >> value;
+		offsetsInt.push_back(value);
+	}
+	offsets.clear();
+	file.close();
+	return offsetsInt;
 }

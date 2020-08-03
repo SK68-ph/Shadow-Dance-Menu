@@ -12,7 +12,7 @@ namespace  listCommands {
 	std::string b_hitboxes = "dota_unit_show_selection_boxes ";//Draws selection hitboxes. 0 = off, 1 = non-trees, 2 = trees, 3 = all entities
 	std::string b_rfarz = "r_farz ";//default -1 multiply it always 2x from distance
 	std::string d_range_display = "dota_range_display ";//any number Displays a ring around the hero at the specified radius
-	std::string d_cl_weather = "d_cl_weather "; //	"Default" 		"Snow" 		"Rain" 		"Moonbeam"		"Pestilence"		"Harvest"		"Sirocco"		"Spring"		"Ash"		"Aurora"
+	std::string d_cl_weather = "cl_weather "; //	"Default = 0" 		"Snow" 		"Rain" 		"Moonbeam"		"Pestilence"		"Harvest"		"Sirocco"		"Spring"		"Ash"		"Aurora"
 	std::string b_fowaa = "fow_client_nofiltering "; //1 - Remove anti-aliasing of fog
 
 

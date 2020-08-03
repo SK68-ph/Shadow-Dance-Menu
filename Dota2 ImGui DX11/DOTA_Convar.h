@@ -2,6 +2,7 @@
 #include "CVars.h"
 #include <sstream>  
 
+
 typedef void(_fastcall* ExecuteCommand)(int, const char*, ...);
 
 
@@ -17,7 +18,7 @@ public:
     void Init() {
         engine2ModBase = getEngine2BaseAddress();
         cmdOffset = 0x467D0;            // feature pattern scan soon.
-        sv_cheatOffsets = 0x548928;     // 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 ?0 0B ?? ?? ?? ?? 00 00 04 00 00 00 00 00 00 00 = 48bytes
+        sv_cheatOffsets = 0x548948;     // 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 ?0 0B ?? ?? ?? ?? 00 00 04 00 00 00 00 00 00 00 = 48bytes
                                         // xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx?x????xxxxxxxxxx
         SV_CHEATS(true);
 
@@ -27,7 +28,7 @@ public:
     void ExecuteCmd(const char* command)
     {
         //input_forceuser
-        //engine2.dll + 46F80  = 48 89 5C 24 08 48 89 6C 24 10 48 89 74 24 20 57 48 81 EC 40 01 00 00
+        //engine2.dll + 467D0  = 48 89 5C 24 08 48 89 6C 24 10 48 89 74 24 20 57 48 81 EC 40 01 00 00
         ExecuteCommand conMsg = (ExecuteCommand)(engine2ModBase + cmdOffset);
         conMsg(0, (const char*)command);
     }
