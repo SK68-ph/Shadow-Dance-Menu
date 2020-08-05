@@ -11,12 +11,12 @@ class UnrestrictedCMD
 public:
     bool bSv_Cheats = false;
 
-    uintptr_t getEngine2BaseAddress() {
-        return (uintptr_t)GetModuleHandle(TEXT("engine2.dll"));
+    uintptr_t getModuleBaseAddress() {
+        return (uintptr_t)GetModuleHandle(TEXT("host.dll"));
     }
     //Populate vars
     void Init() {
-        engine2ModBase = getEngine2BaseAddress();
+        engine2ModBase = getModuleBaseAddress();
         cmdOffset = 0x467D0;            // feature pattern scan soon.
         sv_cheatOffsets = 0x548948;     // 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 ?0 0B ?? ?? ?? ?? 00 00 04 00 00 00 00 00 00 00 = 48bytes
                                         // xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx?x????xxxxxxxxxx
