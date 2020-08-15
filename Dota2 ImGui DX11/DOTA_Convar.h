@@ -12,13 +12,13 @@ public:
     bool bSv_Cheats = false;
 
     uintptr_t getModuleBaseAddress() {
-        return (uintptr_t)GetModuleHandle(TEXT("host.dll"));
+        return (uintptr_t)GetModuleHandle(TEXT("engine2.dll"));
     }
     //Populate vars
     void Init() {
         engine2ModBase = getModuleBaseAddress();
         cmdOffset = 0x467D0;            // feature pattern scan soon.
-        sv_cheatOffsets = 0x548948;     // 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 ?0 0B ?? ?? ?? ?? 00 00 04 00 00 00 00 00 00 00 = 48bytes
+        sv_cheatOffsets = 0x548918;     // 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 ?0 0B ?? ?? ?? ?? 00 00 04 00 00 00 00 00 00 00 = 48bytes
                                         // xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx?x????xxxxxxxxxx
         SV_CHEATS(true);
 
