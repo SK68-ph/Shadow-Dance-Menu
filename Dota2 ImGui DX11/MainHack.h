@@ -4,7 +4,7 @@
 #include "Pattern.h"
 #include "MemIn.h"
 
-class UnrestrictedCMD
+class MainHack
 {
 public:
 
@@ -42,7 +42,6 @@ public:
             vbeAddr = 0;
             return 0;
         }
-            
 
         int* VBE = (int*)vbeAddr;
         if (*VBE == 0) 

@@ -139,9 +139,6 @@
     <ClInclude Include="MemIn.h">
       <Filter>Mem</Filter>
     </ClInclude>
-    <ClInclude Include="DOTA_Convar.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="CVars.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -153,6 +150,9 @@
     </ClInclude>
     <ClInclude Include="PatternUtil.h">
       <Filter>Pattern</Filter>
+    </ClInclude>
+    <ClInclude Include="MainHack.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

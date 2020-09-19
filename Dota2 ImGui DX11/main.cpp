@@ -1,5 +1,5 @@
 #include "includes.h"
-#include "DOTA_Convar.h"
+#include "MainHack.h"
 #include "imgui/droidSans.h"
 #include "imgui/vbeFont.h"
 
@@ -49,7 +49,7 @@ int rangeVal = 1200;
 static int item_current = 0;
 int tempVal = 0;
 std::vector<unsigned int> offsets;
-UnrestrictedCMD cmd;
+MainHack hack;
 
 HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT Flags)
 {
@@ -129,7 +129,7 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 		ImGui::PushFont(vbeFont);
 		ImGui::SetNextWindowSize(ImVec2(320, 100));
 		ImGui::Begin("VBE", NULL, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoResize |ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar);
-		int VBE = cmd.getVBE();
+		int VBE = hack.getVBE();
 		//std::cout << std::dec << VBE << std::endl;
 		if (VBE == 14) // Visible by enemy
 		{
@@ -155,38 +155,38 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 
 	if (weather_item != item_current)
 	{
-		std::string tempCmnd = (cmd.stringBuild(listCommands::d_cl_weather, item_current));
+		std::string tempCmnd = (hack.stringBuild(listCommands::d_cl_weather, item_current));
 		const char* chrCommand = const_cast<char*>(tempCmnd.c_str());
-		int bRes = cmd.ExecuteCmd(chrCommand);
+		int bRes = hack.ExecuteCmd(chrCommand);
 		if (bRes != 1) MsgBox("Command Error","Error",-1);
 	}
 	if (tempBDrawRange != bDrawRange)
 	{
 		bDrawRange ? rangeVal = 1200 : rangeVal = 0;
-		std::string tempCmnd = (cmd.stringBuild(listCommands::d_range_display, rangeVal));
+		std::string tempCmnd = (hack.stringBuild(listCommands::d_range_display, rangeVal));
 		const char* chrCommand = const_cast<char*>(tempCmnd.c_str());
-		int bRes = cmd.ExecuteCmd(chrCommand);
+		int bRes = hack.ExecuteCmd(chrCommand);
 		if (bRes != 1) MsgBox("Command Error", "Error", -1);
 	}
 	if (tempBParticleHack != bParticleHack)
 	{
-		std::string tempCmnd = (cmd.stringBuild(listCommands::b_ParticleHasLimit, !bParticleHack));
+		std::string tempCmnd = (hack.stringBuild(listCommands::b_ParticleHasLimit, !bParticleHack));
 		const char* chrCommand = const_cast<char*>(tempCmnd.c_str());
-		int bRes = cmd.ExecuteCmd(chrCommand);
+		int bRes = hack.ExecuteCmd(chrCommand);
 		if (bRes != 1) MsgBox("Command Error", "Error", -1);
 	}
 	if (tempBNoFog != bNoFog)
 	{
-		std::string tempCmnd = (cmd.stringBuild(listCommands::b_Fog, !bNoFog));
+		std::string tempCmnd = (hack.stringBuild(listCommands::b_Fog, !bNoFog));
 		const char* chrCommand = const_cast<char*>(tempCmnd.c_str());
-		int bRes = cmd.ExecuteCmd(chrCommand);
+		int bRes = hack.ExecuteCmd(chrCommand);
 		if (bRes != 1) MsgBox("Command Error", "Error", -1);
 	}
 	if (tempBcamDistance != camDistance)
 	{
-		std::string tempCmnd = (cmd.stringBuild(listCommands::d_CameraDistance, camDistance));
+		std::string tempCmnd = (hack.stringBuild(listCommands::d_CameraDistance, camDistance));
 		const char* chrCommand = const_cast<char*>(tempCmnd.c_str());
-		int bRes = cmd.ExecuteCmd(chrCommand);
+		int bRes = hack.ExecuteCmd(chrCommand);
 		if (bRes != 1) MsgBox("Command Error", "Error", -1);
 	}
 
@@ -237,7 +237,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReason, LPVOID lpReserved)
 
 bool mainhackInit()
 {
-	if (cmd.Init() != 1)
+	if (hack.Init() != 1)
 	{
 		MsgBox("Initialization Error", "ERROR", -1);
 		Exit = true;
