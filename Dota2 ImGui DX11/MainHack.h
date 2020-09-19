@@ -110,25 +110,27 @@ private:
     std::vector<uint32_t> vbeOffsets = { 0x40, 0x98, 0x170, 0x0, 0x418, 0x20, 0xE04 };
     bool bSV_Cheats;
     bool bInit;
-
-    // AOB SV_CHEATS 1
-    // 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 ? ? ? ? ? ? 00 00 04 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-    
-    // AOB VBE
-    // 80 13 94 1C 7D 01 00 00 10 00 00 00 00 00 00 00 25 00 00 00 00 00 00 00 00 04 AE F3 7C 01 00 00
-    // "engine2.dll"+00580560 = 40, 98, 170, 0, 418, 20, E04;
-    
-    // AOB Unrestricted_CMD
-    // input_forceuser 00007FF891669690
-    // engine2.dll + 467D0  = 48 89 5C 24 08 48 89 6C 24 10 48 89 74 24 20 57 48 81 EC 40 01 00 00
     void ScanModules() {
         Pattern* cmdAOB = new Pattern(GetModuleHandleA("engine2.dll"), "48 89 5C 24 08 48 89 6C 24 10 48 89 74 24 20 57 48 81 EC 40 01 00 00");
         unrestictedCmdAddr = cmdAOB->GetAdress();
         //std::cout <<  "unrestictedCmdAddr = " << std::hex << unrestictedCmdAddr << std::endl;
         ExecuteCmd("sv_cheats 1");
+        Sleep(1);
         Pattern* cheatAOB = new Pattern(GetModuleHandleA("engine2.dll"), "01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 ? ? ? ? ? ? 00 00 04 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00");
         svcheatAddr = cheatAOB->GetAdress();
+        ExecuteCmd("sv_cheats 0");
         //std::cout << "svcheatAddr = " << std::hex << svcheatAddr << std::endl;
     }
 
 };
+
+// AOB SV_CHEATS 1
+// 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 ? ? ? ? ? ? 00 00 04 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+
+// AOB VBE
+// 80 13 94 1C 7D 01 00 00 10 00 00 00 00 00 00 00 25 00 00 00 00 00 00 00 00 04 AE F3 7C 01 00 00
+// "engine2.dll"+00580560 = 40, 98, 170, 0, 418, 20, E04;
+
+// AOB Unrestricted_CMD
+// input_forceuser 00007FF891669690
+// engine2.dll + 467D0  = 48 89 5C 24 08 48 89 6C 24 10 48 89 74 24 20 57 48 81 EC 40 01 00 00
