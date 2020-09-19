@@ -267,28 +267,15 @@ uintptr_t MemIn::AOBScan(const char* const AOB, const ScanBoundaries& scanBounda
 }
 
 //Based on https://guidedhacking.com/threads/finddmaaddy-c-multilevel-pointer-function.6292/
-uintptr_t MemIn::ReadMultiLevelPointer(uintptr_t base, const std::vector<uint32_t>& offsets,bool vbe)
+uintptr_t MemIn::ReadMultiLevelPointer(uintptr_t base, const std::vector<uint32_t>& offsets)
 {
 	MEMORY_BASIC_INFORMATION mbi;
-	if (vbe)
+	for (auto& offset : offsets)
 	{
-		for (unsigned int i = 1; i < offsets.size(); ++i)
-		{
-			if (!VirtualQuery(reinterpret_cast<LPCVOID>(base), &mbi, sizeof(MEMORY_BASIC_INFORMATION)) || mbi.Protect & (PAGE_NOACCESS | PAGE_GUARD))
-				return 0;
+		if (!VirtualQuery(reinterpret_cast<LPCVOID>(base), &mbi, sizeof(MEMORY_BASIC_INFORMATION)) || mbi.Protect & (PAGE_NOACCESS | PAGE_GUARD))
+			return 0;
 
-			base = *reinterpret_cast<uintptr_t*>(base) + offsets[i];
-		}
-	}
-	else
-	{
-		for (auto& offset : offsets)
-		{
-			if (!VirtualQuery(reinterpret_cast<LPCVOID>(base), &mbi, sizeof(MEMORY_BASIC_INFORMATION)) || mbi.Protect & (PAGE_NOACCESS | PAGE_GUARD))
-				return 0;
-
-			base = *reinterpret_cast<uintptr_t*>(base) + offset;
-		}
+		base = *reinterpret_cast<uintptr_t*>(base) + offset;
 	}
 
 	return base;

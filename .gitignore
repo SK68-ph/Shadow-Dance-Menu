@@ -89,3 +89,4 @@ Dota2 ImGui DX11/x64/Debug/Dota2 ImGui Menu.tlog/unsuccessfulbuild
 Dota2 ImGui DX11/x64/Debug/Dota2 ImGui Menu.dll.recipe
 .vs/Dota2 ImGui DX11/v16/ipch/AutoPCH/162087684975137f/MAIN.ipch
 Dota2 ImGui DX11/x64/Release/Dota2 ImGui Menu.dll.recipe
+*.ipch

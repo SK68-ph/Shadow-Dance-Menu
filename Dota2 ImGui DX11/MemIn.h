@@ -317,7 +317,7 @@ public:
 	//Parameters:
 	//  base    [in] The base address.
 	//  offsets [in] A vector specifying the offsets.
-	static uintptr_t ReadMultiLevelPointer(const uintptr_t base, const std::vector<uint32_t>& offsets,bool vbe);
+	static uintptr_t ReadMultiLevelPointer(const uintptr_t base, const std::vector<uint32_t>& offsets);
 
 	//Hooks an address.
 	//Parameters:

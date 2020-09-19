@@ -22,6 +22,9 @@
     <Filter Include="Mem">
       <UniqueIdentifier>{4add1a83-d5a2-4e93-bd81-d2b15c7aa882}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Pattern">
+      <UniqueIdentifier>{9e115468-b9e1-4df4-bd3d-593589118cfa}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="kiero\minhook\src\buffer.c">
@@ -65,6 +68,12 @@
     </ClCompile>
     <ClCompile Include="MemIn.cpp">
       <Filter>Mem</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui\droidSans.h">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="Pattern.cpp">
+      <Filter>Pattern</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -135,6 +144,15 @@
     </ClInclude>
     <ClInclude Include="CVars.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\vbeFont.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="Pattern.h">
+      <Filter>Pattern</Filter>
+    </ClInclude>
+    <ClInclude Include="PatternUtil.h">
+      <Filter>Pattern</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
