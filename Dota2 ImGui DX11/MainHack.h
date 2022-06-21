@@ -113,13 +113,16 @@ private:
     void ScanModules() {
         Pattern* cmdAOB = new Pattern(GetModuleHandleA("engine2.dll"), "48 89 5C 24 08 48 89 6C 24 10 48 89 74 24 20 57 48 81 EC 40 01 00 00");
         unrestictedCmdAddr = cmdAOB->GetAdress();
-        //std::cout <<  "unrestictedCmdAddr = " << std::hex << unrestictedCmdAddr << std::endl;
-        ExecuteCmd("sv_cheats 1");
-        Sleep(1);
-        Pattern* cheatAOB = new Pattern(GetModuleHandleA("engine2.dll"), "01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 ? ? ? ? ? ? 00 00 04 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00");
-        svcheatAddr = cheatAOB->GetAdress();
-        ExecuteCmd("sv_cheats 0");
-        //std::cout << "svcheatAddr = " << std::hex << svcheatAddr << std::endl;
+        std::cout <<  "unrestictedCmdAddr = " << std::hex << unrestictedCmdAddr << std::endl;
+        ExecuteCmd("sv_cheats 3");
+        Sleep(100);
+            Pattern* cheatAOB = new Pattern(GetModuleHandleA("engine2.dll"), "03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 ? ? ? ? ? ? 00 00 04 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00");
+            svcheatAddr = cheatAOB->GetAdress();
+            ExecuteCmd("sv_cheats 0");
+
+        
+
+        std::cout << "svcheatAddr = " << std::hex << svcheatAddr << std::endl;
     }
 
 };

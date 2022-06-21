@@ -74,9 +74,8 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 			pBackBuffer->Release();
 			oWndProc = (WNDPROC)SetWindowLongPtr(window, GWLP_WNDPROC, (LONG_PTR)WndProc);
 			InitImGui();
-			mainhackInit();
-			init = true;
 			IM_ASSERT(ImGui::GetCurrentContext() != NULL && "Missing dear imgui context. Refer to examples app!");
+			init = true;
 		}
 
 		else
@@ -198,10 +197,11 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 
 DWORD WINAPI MainThread(HMODULE hModule)
 {
-	//AllocConsole();
-	//FILE* f;
-	//freopen_s(&f, "CONOUT$", "w", stdout);
+	AllocConsole();
+	FILE* f;
+	freopen_s(&f, "CONOUT$", "w", stdout);
 	bool init_hook = false;
+	mainhackInit();
 	do
 	{
 		if (kiero::init(kiero::RenderType::D3D11) == kiero::Status::Success)
@@ -218,8 +218,8 @@ DWORD WINAPI MainThread(HMODULE hModule)
 
 	Exit = true;
 	kiero::shutdown();
-	//fclose(f);
-	//FreeConsole();
+	fclose(f);
+	FreeConsole();
 	//close main thread
 	FreeLibraryAndExitThread(hModule, 0);
 }

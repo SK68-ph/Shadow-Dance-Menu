@@ -94,3 +94,11 @@ Dota2 ImGui DX11/x64/Release/Dota2 ImGui Menu.dll.recipe
 *.db-shm
 *.db-wal
 *.opendb
+*.pdb
+*.obj
+*.obj
+*.ipdb
+*.iobj
+*.idb
+*.ilk
+.vs/Dota2 ImGui DX11/v17/.suo
