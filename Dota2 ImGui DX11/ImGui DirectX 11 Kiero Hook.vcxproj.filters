@@ -19,11 +19,14 @@
     <Filter Include="imgui">
       <UniqueIdentifier>{3ba57e14-8ac2-485a-b12c-f06690c43d6e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Mem">
+    <Filter Include="Utils">
+      <UniqueIdentifier>{9e115468-b9e1-4df4-bd3d-593589118cfa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Hack">
       <UniqueIdentifier>{4add1a83-d5a2-4e93-bd81-d2b15c7aa882}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Pattern">
-      <UniqueIdentifier>{9e115468-b9e1-4df4-bd3d-593589118cfa}</UniqueIdentifier>
+    <Filter Include="sdk">
+      <UniqueIdentifier>{f54d312a-6dd3-4756-b184-da8a161abb36}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -66,14 +69,14 @@
     <ClCompile Include="imgui\imgui_widgets.cpp">
       <Filter>imgui</Filter>
     </ClCompile>
-    <ClCompile Include="MemIn.cpp">
-      <Filter>Mem</Filter>
-    </ClCompile>
     <ClCompile Include="imgui\droidSans.h">
       <Filter>imgui</Filter>
     </ClCompile>
-    <ClCompile Include="Pattern.cpp">
-      <Filter>Pattern</Filter>
+    <ClCompile Include="utilities.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="CoreHack.cpp">
+      <Filter>Hack</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -136,23 +139,26 @@
     <ClInclude Include="includes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="MemIn.h">
-      <Filter>Mem</Filter>
-    </ClInclude>
-    <ClInclude Include="CVars.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="imgui\vbeFont.h">
       <Filter>imgui</Filter>
     </ClInclude>
-    <ClInclude Include="Pattern.h">
-      <Filter>Pattern</Filter>
+    <ClInclude Include="utilities.h">
+      <Filter>Utils</Filter>
     </ClInclude>
-    <ClInclude Include="PatternUtil.h">
-      <Filter>Pattern</Filter>
+    <ClInclude Include="CoreHack.h">
+      <Filter>Hack</Filter>
     </ClInclude>
-    <ClInclude Include="MainHack.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="IAppSystem.h">
+      <Filter>sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="ICVar.h">
+      <Filter>sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="color.h">
+      <Filter>sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="common.h">
+      <Filter>Utils</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

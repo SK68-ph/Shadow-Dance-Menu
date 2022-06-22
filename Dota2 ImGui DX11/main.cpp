@@ -1,5 +1,5 @@
 #include "includes.h"
-#include "MainHack.h"
+#include "CoreHack.h"
 #include "imgui/droidSans.h"
 #include "imgui/vbeFont.h"
 
@@ -8,7 +8,7 @@ extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam
 //unsigned int ReadVBE(uintptr_t dynamicAddr, std::vector<unsigned int> offsets);
 //std::vector<unsigned int> getOffsetFromText();
 void MsgBox(const char* str, const char* caption, int type);
-bool mainhackInit();
+
 
 Present oPresent;
 HWND window = NULL;
@@ -39,17 +39,15 @@ LRESULT __stdcall WndProc(const HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 	return CallWindowProc(oWndProc, hWnd, uMsg, wParam, lParam);
 }
 
-
+bool bVBE = false, bDrawRange = false, bParticleHack = false, bNoFog = false;		//Weather
+const char* weatherList[] = { "Default", "Winter", " Rain", "MoonBeam", "Pestilence", "Harvest", "Sirocco", "Spring", "Ash", "Aurora" };
+int camDistance = 1200;
+int rangeVal = 1200;
+static int item_current = 0;
+Hack::ConVars convars;
 bool init = false;
 bool Exit = false;
 bool bShowMenu = true;
-bool bVBE = false, bDrawRange = false, bParticleHack = false, bNoFog = false;
-int camDistance = 1300;
-int rangeVal = 1200;
-static int item_current = 0;
-int tempVal = 0;
-std::vector<unsigned int> offsets;
-MainHack hack;
 
 HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT Flags)
 {
@@ -61,7 +59,7 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 
 	if (!init)
 	{
-
+		convars.FindConVars();
 		if (SUCCEEDED(pSwapChain->GetDevice(__uuidof(ID3D11Device), (void**)& pDevice)))
 		{
 			pDevice->GetImmediateContext(&pContext);
@@ -99,53 +97,49 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 	if (bShowMenu)
 	{
 		ImGui::PushFont(mainFont);
-		ImGui::Begin("Skrixx Dota2 Menu");
+		ImGui::Begin("Simple Dota2 Menu");
+
 		ImGui::Text("Visuals");
-		//VBE
 		ImGui::Checkbox("Overlay Visible by enemy.", &bVBE);
-		//Circle Range
-		ImGui::Checkbox("Draw Dagger Circle Range.", &bDrawRange);
+		ImGui::Checkbox("Draw Blink Dagger Circle Range.", &bDrawRange);
 		ImGui::SliderInt("CameraDistance", &camDistance, 0, 3000, "%d");
-		//Weather
-		const char* items[] = { "Default", "Winter", "Rain", "MoonBeam", "Pestilence", "Harvest", "Sirocco", "Spring", "Ash", "Aurora" };
 
-		ImGui::Dummy(ImVec2(1, 30));
+		ImGui::Dummy(ImVec2(1, 10));
 		ImGui::Text("Weather");
-		ImGui::ListBox("", &item_current, items, IM_ARRAYSIZE(items), 4);
+		ImGui::ListBox("", &item_current, weatherList, IM_ARRAYSIZE(weatherList), 4);
 
-		ImGui::Dummy(ImVec2(1,30));
-
+		ImGui::Dummy(ImVec2(1,20));
 		ImGui::Text("Hacks");
-		ImGui::Checkbox("Map Fog.", &bNoFog);
+		ImGui::Checkbox("No Map Fog.", &bNoFog);
 		ImGui::Checkbox("Particle Map Hack.", &bParticleHack);
+
+		ImGui::Dummy(ImVec2(1, 5));
+		if (ImGui::Button("Reset Options", ImVec2(90, 20))) {
+			bVBE = false;
+			bDrawRange = 0;
+			camDistance = 1200;
+			item_current = 0;
+			bNoFog = false;
+			bParticleHack = false;
+		}
+
 		ImGui::End();
 		ImGui::PopFont();
 	}
 
 	if (bVBE)
 	{
-		//,NULL, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar  
 		ImGui::PushFont(vbeFont);
 		ImGui::SetNextWindowSize(ImVec2(320, 100));
 		ImGui::Begin("VBE", NULL, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoResize |ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar);
-		int VBE = hack.getVBE();
-		//std::cout << std::dec << VBE << std::endl;
-		if (VBE == 14) // Visible by enemy
+		int VBE = Hack::getVBE();
+		if (VBE == 0) // Visible by enemy
 		{
 			ImGui::TextColored(ImVec4(255, 0, 0, 255), "Visible");
 		}
-		else if (VBE >= 6 && VBE <= 10) // Not visible by enemy
-		{
-			ImGui::TextColored(ImVec4(124, 252, 0, 255), "Not Visible");
-		}
-		else
+		else if(VBE == -1)
 		{
 			bVBE = false;
-			if (tempVal == 1) {
-				MsgBox("Run VBE Ingame", "Warning!", 1);
-				tempVal = 0;
-			}
-			tempVal++;
 		}
 
 		ImGui::End();
@@ -154,39 +148,25 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 
 	if (weather_item != item_current)
 	{
-		std::string tempCmnd = (hack.stringBuild(listCommands::d_cl_weather, item_current));
-		const char* chrCommand = const_cast<char*>(tempCmnd.c_str());
-		int bRes = hack.ExecuteCmd(chrCommand);
-		if (bRes != 1) MsgBox("Command Error","Error",-1);
+		convars.cl_weather->SetValue(item_current);
 	}
 	if (tempBDrawRange != bDrawRange)
 	{
 		bDrawRange ? rangeVal = 1200 : rangeVal = 0;
-		std::string tempCmnd = (hack.stringBuild(listCommands::d_range_display, rangeVal));
-		const char* chrCommand = const_cast<char*>(tempCmnd.c_str());
-		int bRes = hack.ExecuteCmd(chrCommand);
-		if (bRes != 1) MsgBox("Command Error", "Error", -1);
+		convars.range_display->SetValue(rangeVal);
 	}
 	if (tempBParticleHack != bParticleHack)
 	{
-		std::string tempCmnd = (hack.stringBuild(listCommands::b_ParticleHasLimit, !bParticleHack));
-		const char* chrCommand = const_cast<char*>(tempCmnd.c_str());
-		int bRes = hack.ExecuteCmd(chrCommand);
-		if (bRes != 1) MsgBox("Command Error", "Error", -1);
+		convars.particle_hack->SetValue(!bParticleHack);
 	}
 	if (tempBNoFog != bNoFog)
 	{
-		std::string tempCmnd = (hack.stringBuild(listCommands::b_Fog, !bNoFog));
-		const char* chrCommand = const_cast<char*>(tempCmnd.c_str());
-		int bRes = hack.ExecuteCmd(chrCommand);
-		if (bRes != 1) MsgBox("Command Error", "Error", -1);
+		convars.fog_enable->SetValue(!bNoFog);
 	}
 	if (tempBcamDistance != camDistance)
 	{
-		std::string tempCmnd = (hack.stringBuild(listCommands::d_CameraDistance, camDistance));
-		const char* chrCommand = const_cast<char*>(tempCmnd.c_str());
-		int bRes = hack.ExecuteCmd(chrCommand);
-		if (bRes != 1) MsgBox("Command Error", "Error", -1);
+		convars.camera_distance->SetValue(camDistance);
+		convars.r_farz->SetValue(camDistance * 2);
 	}
 
 	ImGui::Render();
@@ -201,7 +181,6 @@ DWORD WINAPI MainThread(HMODULE hModule)
 	FILE* f;
 	freopen_s(&f, "CONOUT$", "w", stdout);
 	bool init_hook = false;
-	mainhackInit();
 	do
 	{
 		if (kiero::init(kiero::RenderType::D3D11) == kiero::Status::Success)
@@ -235,16 +214,6 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReason, LPVOID lpReserved)
 	return TRUE;
 }
 
-bool mainhackInit()
-{
-	if (hack.Init() != 1)
-	{
-		MsgBox("Initialization Error", "ERROR", -1);
-		Exit = true;
-	}
-	return true;
-}
-
 void MsgBox(const char* str, const char* caption, int type) {
 	switch (type)
 	{
@@ -262,42 +231,3 @@ void MsgBox(const char* str, const char* caption, int type) {
 	}
 		
 }
-
-
-//std::vector<unsigned int> getOffsetFromText() {
-//
-//	std::fstream file;
-//	std::string word;
-//	std::vector<std::string> offsets;
-//	std::vector<unsigned int> offsetsInt;
-//
-//	CHAR czTempPath[MAX_PATH] = { 0 };
-//	GetTempPathA(MAX_PATH, czTempPath); // retrieving temp path
-//	std::string sPath = czTempPath;
-//	sPath += "offs.conf";
-//
-//	//Open text file
-//	file.open(sPath, std::ios::out | std::ios::in);
-//	if (file.fail()) {
-//		MessageBox(NULL, "Config file not found", "ERROR", NULL);
-//	}
-//
-//	int i = 0;
-//	while (file >> word)
-//	{
-//		if (i >= 8) break;
-//
-//		offsets.push_back(word);
-//		i++;
-//	}
-//	for (size_t i = 0; i < offsets.size(); i++)
-//	{
-//		std::istringstream buffer(offsets[i]);
-//		unsigned long long value;
-//		buffer >> std::hex >> value;
-//		offsetsInt.push_back(value);
-//	}
-//	offsets.clear();
-//	file.close();
-//	return offsetsInt;
-//}
