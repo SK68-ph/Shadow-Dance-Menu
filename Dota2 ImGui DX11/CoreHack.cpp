@@ -52,17 +52,3 @@ void Hack::ConVars::FindConVars() {
     this->cl_weather = cvar->FindCommandBase("cl_weather");
     this->particle_hack = cvar->FindCommandBase("dota_use_particle_fow");
 }
-
-
-//void Hack::PrepareCommand(std::string command, int value) {
-//    std::string tempCmnd = command + std::to_string(value);
-//    const char* chrCommand = const_cast<char*>(tempCmnd.c_str());
-//    ExecuteUnrestrictedCmd(chrCommand);
-//}
-//void Hack::PrepareCommand(std::string command, const char* value) {
-//    std::string val = value;
-//    std::string tempCmnd = command + val;
-//    const char* chrCommand = const_cast<char*>(tempCmnd.c_str());
-//    std::cout << chrCommand << std::endl;
-//    ExecuteUnrestrictedCmd(chrCommand);
-//}
