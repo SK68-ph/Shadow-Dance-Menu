@@ -1,61 +1,53 @@
 #include "utilities.h"
 
 
-std::uint8_t* utilities::pattern_scan(const char* module_name, const char* signature) noexcept {
-    const auto module_handle = GetModuleHandleA(module_name);
-
-    if (!module_handle)
-        return nullptr;
-
+uint8_t* utilities::PatternScan(void* module, const char* signature)
+{
     static auto pattern_to_byte = [](const char* pattern) {
         auto bytes = std::vector<int>{};
         auto start = const_cast<char*>(pattern);
-        auto end = const_cast<char*>(pattern) + std::strlen(pattern);
+        auto end = const_cast<char*>(pattern) + strlen(pattern);
 
         for (auto current = start; current < end; ++current) {
             if (*current == '?') {
                 ++current;
-
                 if (*current == '?')
                     ++current;
-
                 bytes.push_back(-1);
             }
             else {
-                bytes.push_back(std::strtoul(current, &current, 16));
+                bytes.push_back(strtoul(current, &current, 16));
             }
         }
         return bytes;
     };
 
-    auto dos_header = reinterpret_cast<PIMAGE_DOS_HEADER>(module_handle);
-    auto nt_headers =
-        reinterpret_cast<PIMAGE_NT_HEADERS>(reinterpret_cast<std::uint8_t*>(module_handle) + dos_header->e_lfanew);
+    auto dosHeader = (PIMAGE_DOS_HEADER)module;
+    auto ntHeaders = (PIMAGE_NT_HEADERS)((std::uint8_t*)module + dosHeader->e_lfanew);
 
-    auto size_of_image = nt_headers->OptionalHeader.SizeOfImage;
-    auto pattern_bytes = pattern_to_byte(signature);
-    auto scan_bytes = reinterpret_cast<std::uint8_t*>(module_handle);
+    auto sizeOfImage = ntHeaders->OptionalHeader.SizeOfImage;
+    auto patternBytes = pattern_to_byte(signature);
+    auto scanBytes = reinterpret_cast<std::uint8_t*>(module);
 
-    auto s = pattern_bytes.size();
-    auto d = pattern_bytes.data();
+    auto s = patternBytes.size();
+    auto d = patternBytes.data();
 
-    for (auto i = 0ul; i < size_of_image - s; ++i) {
+    for (auto i = 0ul; i < sizeOfImage - s; ++i) {
         bool found = true;
-
         for (auto j = 0ul; j < s; ++j) {
-            if (scan_bytes[i + j] != d[j] && d[j] != -1) {
+            if (scanBytes[i + j] != d[j] && d[j] != -1) {
                 found = false;
                 break;
             }
         }
-        if (found)
-            return &scan_bytes[i];
+        if (found) {
+            return &scanBytes[i];
+        }
     }
-
-    throw std::runtime_error(std::string("Wrong signature: ") + signature);
+    return nullptr;
 }
 
-std::uintptr_t utilities::ReadMultiLevelPointer(const uintptr_t ptr, const std::vector<uint32_t>& offsets)
+std::uintptr_t utilities::ReadMultiLevelPointer(uintptr_t ptr, std::vector<uint32_t>& offsets)
 {
     uintptr_t addr = ptr;
     for (unsigned int i = 0; i < offsets.size(); ++i)
