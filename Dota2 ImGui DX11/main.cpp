@@ -18,6 +18,9 @@ ImFont* mainFont;
 ImFont* vbeFont;
 Hack::ConVars convar;
 
+
+
+
 void InitImGui()
 {
 	ImGui::CreateContext();
@@ -37,7 +40,7 @@ LRESULT __stdcall WndProc(const HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 }
 
 // Vars
-bool bVBE = false, bDrawRange = false, bParticleHack = false, bNoFog = false;
+bool bVBE = false, bDrawRange = false, bParticleHack = false, bNoFog = false, bVbeScan = true;
 const char* weatherList[] = { "Default", "Winter", " Rain", "MoonBeam", "Pestilence", "Harvest", "Sirocco", "Spring", "Ash", "Aurora" };
 int camDistance = 1200, rangeVal = 1200;
 static int item_current = 0;
@@ -55,9 +58,10 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 
 	if (!init)
 	{
-		convar.InitConvars();
+		Hack::InitHack();
 		if (SUCCEEDED(pSwapChain->GetDevice(__uuidof(ID3D11Device), (void**)& pDevice)))
 		{
+			std::cout << "Initialized ImGui" << std::endl;
 			pDevice->GetImmediateContext(&pContext);
 			DXGI_SWAP_CHAIN_DESC sd;
 			pSwapChain->GetDesc(&sd);
@@ -70,6 +74,7 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 			InitImGui();
 			IM_ASSERT(ImGui::GetCurrentContext() != NULL && "Missing dear imgui context. Refer to examples app!");
 			init = true;
+			convar.InitConvars();
 		}
 
 		else
@@ -118,6 +123,16 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 			bNoFog = false;
 			bParticleHack = false;
 		}
+		ImGui::SameLine();
+
+		static bool clicked = false;
+		if (ImGui::Button("Rescan VBE", ImVec2(90, 20)))
+		{
+			bVBE = false;
+			Hack::ScanVbeOffset(bVbeScan);
+			bVbeScan = !bVbeScan;
+		}
+		
 
 		ImGui::End();
 		ImGui::PopFont();
@@ -136,6 +151,7 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 		else if(VBE == -1)
 		{
 			bVBE = false;
+			std::cout << "VBE failed, disabling" << std::endl;
 		}
 
 		ImGui::End();
@@ -148,8 +164,12 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 	}
 	if (tempBDrawRange != bDrawRange)
 	{
-		bDrawRange ? rangeVal = 1200 : rangeVal = 0;
-		convar.range_display->SetValue(1200);
+		if (bDrawRange)
+			rangeVal = 1200;
+		else
+			rangeVal = 0;
+		convar.sv_cheats->SetValue(1);
+		convar.drawrange->SetValue(rangeVal);
 	}
 	if (tempBParticleHack != bParticleHack)
 	{
@@ -171,11 +191,13 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 	return oPresent(pSwapChain, SyncInterval, Flags);
 }
 
+
 DWORD WINAPI MainThread(HMODULE hModule)
 {
-	//AllocConsole();
-	//FILE* f;
-	//freopen_s(&f, "CONOUT$", "w", stdout);
+	AllocConsole();
+	FILE* f;
+	freopen_s(&f, "CONOUT$", "w", stdout);
+
 	bool init_hook = false;
 	do
 	{
@@ -183,6 +205,7 @@ DWORD WINAPI MainThread(HMODULE hModule)
 		{
 			kiero::bind(8, (void**)& oPresent, hkPresent);
 			init_hook = true;
+			std::cout << "Successfully Hooked Render Present" << std::endl;
 		}
 	} while (!init_hook);
 
@@ -193,8 +216,8 @@ DWORD WINAPI MainThread(HMODULE hModule)
 
 	Exit = true;
 	kiero::shutdown();
-	//fclose(f);
-	//FreeConsole();
+	fclose(f);
+	FreeConsole();
 	FreeLibraryAndExitThread(hModule, 0);
 }
 
@@ -204,7 +227,6 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReason, LPVOID lpReserved)
 	{
 		DisableThreadLibraryCalls(hModule);
 		CloseHandle(CreateThread(nullptr, 0, (LPTHREAD_START_ROUTINE)MainThread, hModule, 0, nullptr));
-
 	}
 	return TRUE;
 }
