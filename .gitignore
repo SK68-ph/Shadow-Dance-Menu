@@ -106,3 +106,7 @@ Dota2 ImGui DX11/x64/Release/Dota2 ImGui Menu.dll.recipe
 .vs/Simple Hack Menu/v17/.suo
 Dota2 ImGui DX11/x64/Release/Simple Hack Menu.dll.recipe
 *.dll
+Dota2 ImGui DX11/x64/Release/CodeAnalysisResultManifest.txt
+Dota2 ImGui DX11/x64/Release/main.nativecodeanalysis.sarif
+*.log
+x64/Release/Simple Hack Menu.dll.lastcodeanalysissucceeded
