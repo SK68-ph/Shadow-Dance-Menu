@@ -5,10 +5,6 @@
 
 
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
-//unsigned int ReadVBE(uintptr_t dynamicAddr, std::vector<unsigned int> offsets);
-//std::vector<unsigned int> getOffsetFromText();
-void MsgBox(const char* str, const char* caption, int type);
-
 
 Present oPresent;
 HWND window = NULL;
@@ -20,6 +16,7 @@ FILE* f;
 HMODULE hModule;
 ImFont* mainFont;
 ImFont* vbeFont;
+Hack::ConVars convar;
 
 void InitImGui()
 {
@@ -39,12 +36,11 @@ LRESULT __stdcall WndProc(const HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 	return CallWindowProc(oWndProc, hWnd, uMsg, wParam, lParam);
 }
 
-bool bVBE = false, bDrawRange = false, bParticleHack = false, bNoFog = false;		//Weather
+// Vars
+bool bVBE = false, bDrawRange = false, bParticleHack = false, bNoFog = false;
 const char* weatherList[] = { "Default", "Winter", " Rain", "MoonBeam", "Pestilence", "Harvest", "Sirocco", "Spring", "Ash", "Aurora" };
-int camDistance = 1200;
-int rangeVal = 1200;
+int camDistance = 1200, rangeVal = 1200;
 static int item_current = 0;
-Hack::ConVars convars;
 bool init = false;
 bool Exit = false;
 bool bShowMenu = true;
@@ -59,7 +55,7 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 
 	if (!init)
 	{
-		convars.FindConVars();
+		convar.InitConvars();
 		if (SUCCEEDED(pSwapChain->GetDevice(__uuidof(ID3D11Device), (void**)& pDevice)))
 		{
 			pDevice->GetImmediateContext(&pContext);
@@ -130,7 +126,7 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 	if (bVBE)
 	{
 		ImGui::PushFont(vbeFont);
-		ImGui::SetNextWindowSize(ImVec2(320, 100));
+		ImGui::SetNextWindowSize(ImVec2(vbeFont->FontSize * 6, vbeFont->FontSize * 2));
 		ImGui::Begin("VBE", NULL, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoResize |ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar);
 		int VBE = Hack::getVBE();
 		if (VBE == 0) // Visible by enemy
@@ -148,25 +144,25 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 
 	if (weather_item != item_current)
 	{
-		convars.cl_weather->SetValue(item_current);
+		convar.weather->SetValue(item_current);
 	}
 	if (tempBDrawRange != bDrawRange)
 	{
 		bDrawRange ? rangeVal = 1200 : rangeVal = 0;
-		convars.range_display->SetValue(rangeVal);
+		convar.range_display->SetValue(1200);
 	}
 	if (tempBParticleHack != bParticleHack)
 	{
-		convars.particle_hack->SetValue(!bParticleHack);
+		convar.particle_hack->SetValue(!bParticleHack);
 	}
 	if (tempBNoFog != bNoFog)
 	{
-		convars.fog_enable->SetValue(!bNoFog);
+		convar.fog_enable->SetValue(!bNoFog);
 	}
 	if (tempBcamDistance != camDistance)
 	{
-		convars.camera_distance->SetValue(camDistance);
-		convars.r_farz->SetValue(camDistance * 2);
+		convar.camera_distance->SetValue(camDistance);
+		convar.r_farz->SetValue(camDistance * 2);
 	}
 
 	ImGui::Render();
@@ -177,9 +173,9 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 
 DWORD WINAPI MainThread(HMODULE hModule)
 {
-	AllocConsole();
-	FILE* f;
-	freopen_s(&f, "CONOUT$", "w", stdout);
+	//AllocConsole();
+	//FILE* f;
+	//freopen_s(&f, "CONOUT$", "w", stdout);
 	bool init_hook = false;
 	do
 	{
@@ -197,9 +193,8 @@ DWORD WINAPI MainThread(HMODULE hModule)
 
 	Exit = true;
 	kiero::shutdown();
-	fclose(f);
-	FreeConsole();
-	//close main thread
+	//fclose(f);
+	//FreeConsole();
 	FreeLibraryAndExitThread(hModule, 0);
 }
 
@@ -212,22 +207,4 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReason, LPVOID lpReserved)
 
 	}
 	return TRUE;
-}
-
-void MsgBox(const char* str, const char* caption, int type) {
-	switch (type)
-	{
-	case 0:
-		MessageBox(NULL, str, caption, MB_OK | MB_ICONINFORMATION);
-		break;
-	case 1:
-		MessageBox(NULL, str, caption, MB_OK | MB_ICONWARNING);
-		break;
-	case -1:
-		MessageBox(NULL, str, caption, MB_ABORTRETRYIGNORE | MB_ICONERROR);
-		break;
-	default:
-		break;
-	}
-		
 }

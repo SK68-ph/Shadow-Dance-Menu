@@ -6,18 +6,16 @@
 namespace Hack
 {
 	int getVBE();
-    int InitVbe();
 
     class ConVars {
     public:
-        void FindConVars();
+        void InitConvars();
 
-        ConCommandBase* sv_cheats;
         ConCommandBase* camera_distance;
         ConCommandBase* range_display;
         ConCommandBase* r_farz;
         ConCommandBase* fog_enable;
-        ConCommandBase* cl_weather;
+        ConCommandBase* weather;
         ConCommandBase* particle_hack;
     };
 
