@@ -3,6 +3,7 @@
 
 uintptr_t vbeBaseAddr;
 uintptr_t vbeAddr;
+uintptr_t engine2Addr;
 std::vector<unsigned int> vbeOffsets;
 std::vector<uintptr_t> vbeScanAddr;
 std::vector<unsigned int> vbeScanOffsets;
@@ -59,9 +60,12 @@ int Hack::SaveOffsetConfig() {
 }
 
 void Hack::InitHack() {
+
+    engine2Addr = (uintptr_t)GetModuleHandleA("engine2.dll");
+    std::cout << "Found engine2 address = " << std::hex << engine2Addr << std::endl;
     if (LoadOffsetConfig() == -1)
     {
-        vbeOffsets = { 0x0, 0x30, 0x38, 0x98, 0x170, 0x0, 0xAB0 };
+        vbeOffsets = { 0x0, 0x30, 0x38, 0x98, 0x170, 0x0, 0xAC0 };
         SaveOffsetConfig();
     }
 }
@@ -70,7 +74,7 @@ void Hack::InitHack() {
 void ScanVBEBase() {
     for (size_t i = 0; i < patterns.size(); i++)
     {
-        vbeBaseAddr = (uintptr_t)(utilities::PatternScan(GetModuleHandleA("engine2.dll"), patterns[i]));
+        vbeBaseAddr = (uintptr_t)(utilities::PatternScan((void*)engine2Addr, patterns[i]));
         if (vbeBaseAddr != NULL)
             break;
     }
@@ -113,6 +117,8 @@ int Hack::ScanVbeOffset(bool firstScan) {
                 vbeOffsets[vbeOffsets.size() - 1] = vbeScanOffsets[i];
                 std::cout << "Success Vbe can now be enabled. Found correct vbe addr = " << std::hex << vbeScanAddr[i] << " Offset = " << vbeScanOffsets[i] << std::endl;
                 vbeAddr = NULL;
+                vbeScanAddr.clear();
+                vbeScanOffsets.clear();
                 SaveOffsetConfig();
                 return 1;
             }
