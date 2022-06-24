@@ -43,6 +43,7 @@ LRESULT __stdcall WndProc(const HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 bool bVBE = false, bDrawRange = false, bParticleHack = false, bNoFog = false, bVbeScan = true;
 const char* weatherList[] = { "Default", "Winter", " Rain", "MoonBeam", "Pestilence", "Harvest", "Sirocco", "Spring", "Ash", "Aurora" };
 int camDistance = 1200, rangeVal = 1200;
+int prevVbe;
 static int item_current = 0;
 bool init = false;
 bool Exit = false;
@@ -144,7 +145,7 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 		ImGui::SetNextWindowSize(ImVec2(vbeFont->FontSize * 6, vbeFont->FontSize * 2));
 		ImGui::Begin("VBE", NULL, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoResize |ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar);
 		int VBE = Hack::getVBE();
-		if (VBE == 0) // Visible by enemy
+		if (VBE == 0 && prevVbe == 0) // Visible by enemy
 		{
 			ImGui::TextColored(ImVec4(255, 0, 0, 255), "Visible");
 		}
@@ -153,7 +154,8 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 			bVBE = false;
 			std::cout << "VBE failed, disabling" << std::endl;
 		}
-
+		Sleep(1);
+		prevVbe = VBE;
 		ImGui::End();
 		ImGui::PopFont();
 	}
