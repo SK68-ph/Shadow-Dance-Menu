@@ -194,6 +194,7 @@
     <ClInclude Include="sdk\IAppSystem.h" />
     <ClInclude Include="sdk\ICVar.h" />
     <ClInclude Include="utilities.h" />
+    <ClInclude Include="vmt.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

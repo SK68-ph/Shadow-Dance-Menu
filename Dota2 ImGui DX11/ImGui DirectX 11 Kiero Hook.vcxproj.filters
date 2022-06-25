@@ -160,6 +160,9 @@
     <ClInclude Include="sdk\ICVar.h">
       <Filter>sdk</Filter>
     </ClInclude>
+    <ClInclude Include="vmt.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="kiero\minhook\dll_resources\MinHook.def">

@@ -143,7 +143,7 @@ int Hack::getVBE() {
         if (vbeAddr == NULL)
             return -1;
     }
-    if (utilities::isPtrReadable(vbeAddr) == false) {
+    if (utilities::validateAddr(vbeAddr) == false) {
         vbeAddr = NULL;
         return -1;
     }
