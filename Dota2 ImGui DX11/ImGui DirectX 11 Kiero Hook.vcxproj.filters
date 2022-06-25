@@ -148,17 +148,17 @@
     <ClInclude Include="CoreHack.h">
       <Filter>Hack</Filter>
     </ClInclude>
-    <ClInclude Include="IAppSystem.h">
-      <Filter>sdk</Filter>
-    </ClInclude>
-    <ClInclude Include="ICVar.h">
-      <Filter>sdk</Filter>
-    </ClInclude>
-    <ClInclude Include="color.h">
-      <Filter>sdk</Filter>
-    </ClInclude>
     <ClInclude Include="common.h">
       <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="sdk\color.h">
+      <Filter>sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="sdk\IAppSystem.h">
+      <Filter>sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="sdk\ICVar.h">
+      <Filter>sdk</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

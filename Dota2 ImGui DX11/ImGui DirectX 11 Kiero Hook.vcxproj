@@ -169,11 +169,8 @@
     <ResourceCompile Include="kiero\minhook\dll_resources\MinHook.rc" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="color.h" />
     <ClInclude Include="common.h" />
     <ClInclude Include="CoreHack.h" />
-    <ClInclude Include="IAppSystem.h" />
-    <ClInclude Include="ICVar.h" />
     <ClInclude Include="imgui\imconfig.h" />
     <ClInclude Include="imgui\imgui.h" />
     <ClInclude Include="imgui\imgui_impl_dx11.h" />
@@ -193,6 +190,9 @@
     <ClInclude Include="kiero\minhook\src\hde\table32.h" />
     <ClInclude Include="kiero\minhook\src\hde\table64.h" />
     <ClInclude Include="kiero\minhook\src\trampoline.h" />
+    <ClInclude Include="sdk\color.h" />
+    <ClInclude Include="sdk\IAppSystem.h" />
+    <ClInclude Include="sdk\ICVar.h" />
     <ClInclude Include="utilities.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

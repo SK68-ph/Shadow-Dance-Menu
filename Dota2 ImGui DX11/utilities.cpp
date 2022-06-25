@@ -58,7 +58,7 @@ std::uintptr_t utilities::ReadMultiLevelPointer(uintptr_t ptr, std::vector<uint3
     return addr;
 }
 
-bool utilities::isPtrReadable(uintptr_t base) {
+bool utilities::validateAddr(uintptr_t base) {
     MEMORY_BASIC_INFORMATION mbi;
     if (!VirtualQuery(reinterpret_cast<LPCVOID>(base), &mbi, sizeof(MEMORY_BASIC_INFORMATION)) || mbi.Protect & (PAGE_NOACCESS | PAGE_GUARD))
         return 0;
