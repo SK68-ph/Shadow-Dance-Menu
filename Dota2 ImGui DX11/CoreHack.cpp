@@ -1,162 +1,85 @@
 #include "CoreHack.h"
-#include <map>
 
-uintptr_t vbeBaseAddr;
-uintptr_t vbeAddr;
-uintptr_t engine2Addr;
-std::vector<unsigned int> vbeOffsets;
-std::vector<uintptr_t> vbeScanAddr;
-std::vector<unsigned int> vbeScanOffsets;
+CGameEntitySystem* entity;
+std::vector<CEntityInstance*> Heroes;
+VMT* entityVMT;
 
-std::vector<const char*> patterns = { 
-    "? ? ? ? ? 01 00 00 02 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 ? ? ? ? ? 01 00 00" ,
-    "? ? ? ? ? 02 00 00 02 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 ? ? ? ? ? 02 00 00" 
-};
+CEntityInstance* OnAddEntity(CGameEntitySystem* ecx, CEntityInstance* ptr, EntityHandle index)
+{
+    auto ret = entityVMT->GetOriginalMethod(OnAddEntity)(ecx, ptr, index);
+    const char* typeName = ptr->Schema_DynamicBinding()->bindingName;
 
-int Hack::LoadOffsetConfig() {
+    if (strstr(typeName, "DOTA_Unit_Hero")) {
 
-    std::fstream file;
-    std::string word;
-    std::vector<std::string> offsets;
-    std::vector<unsigned int> offsetsInt;
-
-    std::cout << "Loading offsets.ini" << std::endl;
-    file.open("offsets.ini", std::ios::out | std::ios::in);
-    if (file.fail()) {
-        std::cout << "Failed to load offsets.init, loading defaults (If vbe not working try to rescan)" << std::endl;
-        return -1;
-    }
-    int i = 0;
-    while (file >> word)
-    {
-        if (i >= 8 || word.empty()) break;
-
-        offsets.push_back(word);
-        i++;
-    }
-    for (size_t i = 0; i < offsets.size(); i++)
-    {
-        std::istringstream buffer(offsets[i]);
-        unsigned long long value;
-        buffer >> std::hex >> value;
-        offsetsInt.push_back(value);
-    }
-    vbeOffsets = offsetsInt;
-    return 1;
-}
-
-int Hack::SaveOffsetConfig() {
-    std::ofstream file("offsets.ini");
-
-    std::cout << "Saving to offsets.ini" << std::endl;
-    for (size_t i = 0; i < vbeOffsets.size(); i++)
-    {
-        std::stringstream sstream;
-        sstream << std::hex << vbeOffsets[i];
-        std::string result = sstream.str();
-        file << result << std::endl;
-    }
-    file.close();
-}
-
-void Hack::InitHack() {
-
-    engine2Addr = (uintptr_t)GetModuleHandleA("engine2.dll");
-    std::cout << "Found engine2 address = " << std::hex << engine2Addr << std::endl;
-    if (LoadOffsetConfig() == -1)
-    {
-        vbeOffsets = { 0x0, 0x30, 0x38, 0x98, 0x170, 0x0, 0xAC0 };
-        SaveOffsetConfig();
-    }
-}
-
-
-void ScanVBEBase() {
-    for (size_t i = 0; i < patterns.size(); i++)
-    {
-        vbeBaseAddr = (uintptr_t)(utilities::PatternScan((void*)engine2Addr, patterns[i]));
-        if (vbeBaseAddr != NULL)
-            break;
-    }
-    if (vbeBaseAddr != NULL)
-    {
-        std::cout << "Found vbe base address = " << std::hex << vbeBaseAddr << std::endl;
-    }
-}
-
-
-int Hack::ScanVbeOffset(bool firstScan) {
-    if (vbeBaseAddr == NULL)
-    {
-        ScanVBEBase();
-        if (vbeBaseAddr == NULL)
-            return 0;
-    }
-    if (firstScan)
-    {
-        auto tempOffsets = vbeOffsets;
-        for (int i = 0x100; i < 0xFFF; i = i + 0x4)
+        auto alreadyExists = false;
+        for (auto hero : Heroes)
         {
-            tempOffsets[tempOffsets.size() - 1] = i;
-            vbeAddr = utilities::ReadMultiLevelPointer(vbeBaseAddr, tempOffsets);
-            if (*(float*)vbeAddr > 0.0001 && *(float*)vbeAddr < 1.0)
+            if (typeName == hero->Schema_DynamicBinding()->bindingName)
             {
-                vbeScanAddr.push_back(vbeAddr);
-                vbeScanOffsets.push_back(i);
-                std::cout << "Scanned vbe addr = " << std::hex << vbeAddr << " Offset = " << i << std::endl;
+                alreadyExists = true;
+                break;
             }
         }
-        std::cout << "Scan complete, Make your self visible to the enemy and hit Scan button again" << std::endl;
-        return 1;
-    }
-    else
-    {
-        for (size_t i = 0; i < vbeScanAddr.size(); i++)
+
+        if (!alreadyExists)
         {
-            if (*(int*)(vbeScanAddr[i]) == 0) {
-                vbeOffsets[vbeOffsets.size() - 1] = vbeScanOffsets[i];
-                std::cout << "Success Vbe can now be enabled. Found correct vbe addr = " << std::hex << vbeScanAddr[i] << " Offset = " << vbeScanOffsets[i] << std::endl;
-                vbeAddr = NULL;
-                vbeScanAddr.clear();
-                vbeScanOffsets.clear();
-                SaveOffsetConfig();
-                return 1;
-            }
+            Heroes.push_back(ptr);
         }
     }
-    return 0;
+
+    return ret;
 }
 
+CEntityInstance* OnRemoveEntity(CGameEntitySystem* ecx, CEntityInstance* ptr, EntityHandle index)
+{
+    const char* typeName = ptr->Schema_DynamicBinding()->bindingName;
 
-int Hack::getVBE() {
-    
-    if (vbeBaseAddr == NULL)
+    if (strstr(typeName, "DOTA_Unit_Hero")) {
+        for (size_t i = Heroes.size(); i-- > 0; ) {
+            if (Heroes[i] == ptr) {
+                Heroes.erase(Heroes.begin() + i);
+                break;
+            }
+        }
+    }
+
+    return entityVMT->GetOriginalMethod(OnRemoveEntity)(ecx, ptr, index);
+}
+
+void InitHack() {
+    // Init entityvmt modules
+    void* client = utilities::GetInterface("client.dll", "Source2Client002");
+    uintptr_t* vmt_slot = *(uintptr_t**)client + 25; //25th function in Source2Client vtable
+    uintptr_t addr_start = *vmt_slot + 3; //stores the relative address portion of the mov rax, [rip + 0x2512059] instruction
+    entity = *(CGameEntitySystem**)(addr_start + *(uint32_t*)(addr_start)+4); //pointer to CGameEntitySystem is at 2512059 + addr_start + 4
+    std::cout << std::hex <<  "Entity Addr = " << (uintptr_t)entity << std::endl;
+    // Hook our entity
+    entityVMT = new VMT(entity); //loads CGameEntitySystem VMT into vmt.entity
+    entityVMT->HookVMT(OnAddEntity, 14);
+    entityVMT->HookVMT(OnRemoveEntity, 15);
+    entityVMT->ApplyVMT(entity);
+}
+
+void ExitHack()
+{
+    entityVMT->RevertVMT(entity);
+}
+
+int getVBE() {
+    if (Heroes.size() == 0)
     {
-        ScanVBEBase();
-        if (vbeBaseAddr == NULL)
-            return -1;
-    }
-
-
-    if (vbeAddr == NULL){
-        vbeAddr = utilities::ReadMultiLevelPointer(vbeBaseAddr, vbeOffsets);
-        if (vbeAddr == NULL)
-            return -1;
-    }
-    if (utilities::validateAddr(vbeAddr) == false) {
-        vbeAddr = NULL;
         return -1;
     }
 
-    int* VBE = (int*)vbeAddr;
-    if (*VBE == 0)
+    auto VBE = *(int*)(((uintptr_t)Heroes[0]) + 0x16B0); // vbe offset
+    if (VBE == 0)
     {
         return 0;
     }
     return 1;
 }
 
-void Hack::ConVars::InitConvars() {
+void ConVars::InitConvars() {
     ICvar* cvar = reinterpret_cast<ICvar*>(utilities::GetInterface("tier0.dll", "VEngineCvar007"));
     std::cout << "Found cvar address = " << cvar << std::endl;
     this->sv_cheats = cvar->FindCommandBase("sv_cheats");

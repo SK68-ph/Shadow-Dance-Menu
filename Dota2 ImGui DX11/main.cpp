@@ -16,10 +16,7 @@ FILE* f;
 HMODULE hModule;
 ImFont* mainFont;
 ImFont* vbeFont;
-Hack::ConVars convar;
-
-
-
+ConVars convar;
 
 void InitImGui()
 {
@@ -40,15 +37,15 @@ LRESULT __stdcall WndProc(const HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 	return CallWindowProc(oWndProc, hWnd, uMsg, wParam, lParam);
 }
 
-// Vars
+// Features Vars
 bool bVBE = false, bDrawRange = false, bParticleHack = false, bNoFog = false, bVbeScan = true;
 const char* weatherList[] = { "Default", "Winter", " Rain", "MoonBeam", "Pestilence", "Harvest", "Sirocco", "Spring", "Ash", "Aurora" };
 int camDistance = 1200, rangeVal = 1200;
 int prevVbe;
-static int item_current = 0;
-bool init = false;
-bool Exit = false;
-bool bShowMenu = true;
+int item_current = 0;
+
+// Imgui Vars
+bool init = false, Exit = false, bShowMenu = true;
 
 HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT Flags)
 {
@@ -60,7 +57,7 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 
 	if (!init)
 	{
-		Hack::InitHack();
+		InitHack();
 		if (SUCCEEDED(pSwapChain->GetDevice(__uuidof(ID3D11Device), (void**)& pDevice)))
 		{
 			std::cout << "Initialized ImGui" << std::endl;
@@ -125,17 +122,6 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 			bNoFog = false;
 			bParticleHack = false;
 		}
-		ImGui::SameLine();
-
-		static bool clicked = false;
-		if (ImGui::Button("Rescan VBE", ImVec2(90, 20)))
-		{
-			bVBE = false;
-			Hack::ScanVbeOffset(bVbeScan);
-			bVbeScan = !bVbeScan;
-		}
-		
-
 		ImGui::End();
 		ImGui::PopFont();
 	}
@@ -145,7 +131,8 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 		ImGui::PushFont(vbeFont);
 		ImGui::SetNextWindowSize(ImVec2(vbeFont->FontSize * 6, vbeFont->FontSize * 2));
 		ImGui::Begin("VBE", NULL, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoResize |ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar);
-		int VBE = Hack::getVBE();
+		int VBE = getVBE();
+		Sleep(1);
 		if (VBE == 0 && prevVbe == 0) // Visible by enemy
 		{
 			ImGui::TextColored(ImVec4(255, 0, 0, 255), "Visible");
@@ -155,7 +142,6 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 			bVBE = false;
 			std::cout << "VBE failed, disabling" << std::endl;
 		}
-		Sleep(1);
 		prevVbe = VBE;
 		ImGui::End();
 		ImGui::PopFont();
@@ -219,6 +205,7 @@ DWORD WINAPI MainThread(HMODULE hModule)
 
 	Exit = true;
 	kiero::shutdown();
+	ExitHack();
 	fclose(f);
 	FreeConsole();
 	FreeLibraryAndExitThread(hModule, 0);
