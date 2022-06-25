@@ -24,7 +24,3 @@ public:
     ConCommandBase* weather;
     ConCommandBase* particle_hack;
 };
-
-
-
-

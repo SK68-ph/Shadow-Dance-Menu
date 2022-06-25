@@ -47,7 +47,7 @@ CEntityInstance* OnRemoveEntity(CGameEntitySystem* ecx, CEntityInstance* ptr, En
 }
 
 void InitHack() {
-    // Init entityvmt modules
+    // Init CGameEntitySystem
     void* client = utilities::GetInterface("client.dll", "Source2Client002");
     uintptr_t* vmt_slot = *(uintptr_t**)client + 25; //25th function in Source2Client vtable
     uintptr_t addr_start = *vmt_slot + 3; //stores the relative address portion of the mov rax, [rip + 0x2512059] instruction
@@ -62,16 +62,17 @@ void InitHack() {
 
 void ExitHack()
 {
+    // Unhook entity
     entityVMT->RevertVMT(entity);
 }
 
 int getVBE() {
-    if (Heroes.size() == 0)
+    if (Heroes.size() == 0) // check if entity is populated
     {
         return -1;
     }
 
-    auto VBE = *(int*)(((uintptr_t)Heroes[0]) + 0x16B0); // vbe offset
+    auto VBE = *(int*)(((uintptr_t)Heroes[0]) + 0x16B0); // vbeoffset = CEntityInstance+0x16B0
     if (VBE == 0)
     {
         return 0;

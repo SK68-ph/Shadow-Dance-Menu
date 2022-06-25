@@ -163,6 +163,12 @@
     <ClInclude Include="vmt.h">
       <Filter>Utils</Filter>
     </ClInclude>
+    <ClInclude Include="sdk\CEntityInstance.h">
+      <Filter>sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="sdk\CGameEntitySystem.h">
+      <Filter>sdk</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="kiero\minhook\dll_resources\MinHook.def">

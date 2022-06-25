@@ -190,6 +190,8 @@
     <ClInclude Include="kiero\minhook\src\hde\table32.h" />
     <ClInclude Include="kiero\minhook\src\hde\table64.h" />
     <ClInclude Include="kiero\minhook\src\trampoline.h" />
+    <ClInclude Include="sdk\CEntityInstance.h" />
+    <ClInclude Include="sdk\CGameEntitySystem.h" />
     <ClInclude Include="sdk\color.h" />
     <ClInclude Include="sdk\IAppSystem.h" />
     <ClInclude Include="sdk\ICVar.h" />
