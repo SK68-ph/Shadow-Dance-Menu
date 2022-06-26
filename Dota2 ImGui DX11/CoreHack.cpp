@@ -23,7 +23,15 @@ CEntityInstance* OnAddEntity(CGameEntitySystem* ecx, CEntityInstance* ptr, Entit
 
         if (!alreadyExists)
         {
-            Heroes.push_back(ptr);
+            if (Heroes.size() == 0)
+            {
+                Heroes.push_back(ptr);
+            }
+            if (ptr->C_BaseEntity__InSameTeam(Heroes[0]) && Heroes.size() > 0)
+            {
+                Heroes.push_back(ptr);
+                std::cout << typeName << std::hex << " Addr = " << (uintptr_t)ptr;
+            }
         }
     }
 
@@ -66,6 +74,11 @@ void ExitHack()
     entityVMT->RevertVMT(entity);
 }
 
+bool isEntityPopulated()
+{
+    return (Heroes.size() > 0);
+}
+
 int getVBE() {
     if (Heroes.size() == 0) // check if entity is populated
     {
@@ -80,8 +93,8 @@ int getVBE() {
     return 1;
 }
 
+ICvar* cvar = reinterpret_cast<ICvar*>(utilities::GetInterface("tier0.dll", "VEngineCvar007"));
 void ConVars::InitConvars() {
-    ICvar* cvar = reinterpret_cast<ICvar*>(utilities::GetInterface("tier0.dll", "VEngineCvar007"));
     std::cout << "Found cvar address = " << cvar << std::endl;
     this->sv_cheats = cvar->FindCommandBase("sv_cheats");
     this->camera_distance = cvar->FindCommandBase("dota_camera_distance");
@@ -90,4 +103,18 @@ void ConVars::InitConvars() {
     this->fog_enable = cvar->FindCommandBase("fog_enable");
     this->weather = cvar->FindCommandBase("cl_weather");
     this->particle_hack = cvar->FindCommandBase("dota_use_particle_fow");
+}
+
+void ConVars::ResetConvars()
+{
+    if (cvar != nullptr)
+    {
+        this->weather->SetValue(0);
+        this->camera_distance->SetValue(1200);
+        this->drawrange->SetValue(0);
+        this->r_farz->SetValue(-1);
+        this->fog_enable->SetValue(false);
+        this->particle_hack->SetValue(false);
+        this->sv_cheats->SetValue(0);
+    }
 }

@@ -57,7 +57,6 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 
 	if (!init)
 	{
-		InitHack();
 		if (SUCCEEDED(pSwapChain->GetDevice(__uuidof(ID3D11Device), (void**)& pDevice)))
 		{
 			std::cout << "Initialized ImGui" << std::endl;
@@ -73,7 +72,6 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 			InitImGui();
 			IM_ASSERT(ImGui::GetCurrentContext() != NULL && "Missing dear imgui context. Refer to examples app!");
 			init = true;
-			convar.InitConvars();
 		}
 
 		else
@@ -86,9 +84,9 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 	}
 
 	//temporary vars
-	bool tempBVBE = bVBE, tempBDrawRange = bDrawRange, tempBParticleHack = bParticleHack, tempBNoFog = bNoFog;
-	int tempBcamDistance = camDistance;
-	int weather_item = item_current;
+	int tempBVBE = -1, tempBDrawRange = -1, tempBParticleHack = -1, tempBNoFog = -1;
+	int tempcamDistance = -1;
+	int weather_item = -1;
 	ImGui_ImplDX11_NewFrame();
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
@@ -121,57 +119,64 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 			item_current = 0;
 			bNoFog = false;
 			bParticleHack = false;
+			convar.ResetConvars();
 		}
 		ImGui::End();
 		ImGui::PopFont();
 	}
 
-	if (bVBE)
+	if (isEntityPopulated())
 	{
-		ImGui::PushFont(vbeFont);
-		ImGui::SetNextWindowSize(ImVec2(vbeFont->FontSize * 6, vbeFont->FontSize * 2));
-		ImGui::Begin("VBE", NULL, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoResize |ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar);
-		int VBE = getVBE();
-		Sleep(1);
-		if (VBE == 0 && prevVbe == 0) // Visible by enemy
+		if (bVBE)
 		{
-			ImGui::TextColored(ImVec4(255, 0, 0, 255), "Visible");
+			ImGui::PushFont(vbeFont);
+			ImGui::SetNextWindowSize(ImVec2(vbeFont->FontSize * 6, vbeFont->FontSize * 2));
+			ImGui::Begin("VBE", NULL, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar);
+			int VBE = getVBE();
+			Sleep(1);
+			if (VBE == 0 && prevVbe == 0) // Visible by enemy
+			{
+				ImGui::TextColored(ImVec4(255, 0, 0, 255), "Visible");
+			}
+			else if (VBE == -1)
+			{
+				bVBE = false;
+				std::cout << "VBE failed, disabling" << std::endl;
+			}
+			prevVbe = VBE;
+			ImGui::End();
+			ImGui::PopFont();
 		}
-		else if(VBE == -1)
+		if (weather_item != item_current)
 		{
-			bVBE = false;
-			std::cout << "VBE failed, disabling" << std::endl;
+			convar.weather->SetValue(item_current);
 		}
-		prevVbe = VBE;
-		ImGui::End();
-		ImGui::PopFont();
-	}
+		if (tempBDrawRange != bDrawRange)
+		{
+			if (bDrawRange)
+				rangeVal = 1200;
+			else
+				rangeVal = 0;
+			convar.sv_cheats->SetValue(1);
+			convar.drawrange->SetValue(rangeVal);
+		}
+		if (tempBParticleHack != bParticleHack)
+		{
+			convar.particle_hack->SetValue(!bParticleHack);
+		}
+		if (tempBNoFog != bNoFog)
+		{
+			convar.fog_enable->SetValue(!bNoFog);
+		}
+		if (tempcamDistance != camDistance)
+		{
+			convar.camera_distance->SetValue(camDistance);
+			convar.r_farz->SetValue(camDistance * 2);
+		}
 
-	if (weather_item != item_current)
-	{
-		convar.weather->SetValue(item_current);
-	}
-	if (tempBDrawRange != bDrawRange)
-	{
-		if (bDrawRange)
-			rangeVal = 1200;
-		else
-			rangeVal = 0;
-		convar.sv_cheats->SetValue(1);
-		convar.drawrange->SetValue(rangeVal);
-	}
-	if (tempBParticleHack != bParticleHack)
-	{
-		convar.particle_hack->SetValue(!bParticleHack);
-	}
-	if (tempBNoFog != bNoFog)
-	{
-		convar.fog_enable->SetValue(!bNoFog);
-	}
-	if (tempBcamDistance != camDistance)
-	{
-		convar.camera_distance->SetValue(camDistance);
-		convar.r_farz->SetValue(camDistance * 2);
+		tempBVBE = bVBE, tempBDrawRange = bDrawRange, tempBParticleHack = bParticleHack, tempBNoFog = bNoFog;
+		tempcamDistance = camDistance;
+		weather_item = item_current;
 	}
 
 	ImGui::Render();
@@ -187,6 +192,8 @@ DWORD WINAPI MainThread(HMODULE hModule)
 	FILE* f;
 	freopen_s(&f, "CONOUT$", "w", stdout);
 
+	convar.InitConvars();
+	InitHack();
 	bool init_hook = false;
 	do
 	{
@@ -198,7 +205,7 @@ DWORD WINAPI MainThread(HMODULE hModule)
 		}
 	} while (!init_hook);
 
-	while (!GetAsyncKeyState(VK_DELETE) && Exit == false)
+	while (!GetAsyncKeyState(VK_END) && Exit == false)
 	{
 		Sleep(1);
 	}

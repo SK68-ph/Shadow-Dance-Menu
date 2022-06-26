@@ -11,11 +11,13 @@
 int getVBE();
 void InitHack();
 void ExitHack();
+bool isEntityPopulated();
+
 
 class ConVars {
 public:
     void InitConvars();
-
+    void ResetConvars();
     ConCommandBase* sv_cheats;
     ConCommandBase* camera_distance;
     ConCommandBase* drawrange;
