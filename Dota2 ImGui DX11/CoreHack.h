@@ -5,6 +5,7 @@
 #include "sdk/ICVar.h"
 #include "sdk/CGameEntitySystem.h"
 #include "sdk/IAppSystem.h"
+#include "sdk/IEngineClient.h"
 #include "vmt.h"
 
 
@@ -12,7 +13,7 @@ int getVBE();
 void InitHack();
 void ExitHack();
 bool isEntityPopulated();
-
+void test();
 
 class ConVars {
 public:

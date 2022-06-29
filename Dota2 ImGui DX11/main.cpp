@@ -207,6 +207,10 @@ DWORD WINAPI MainThread(HMODULE hModule)
 
 	while (!GetAsyncKeyState(VK_END) && Exit == false)
 	{
+		if (GetAsyncKeyState(VK_DELETE) & 1)
+		{
+			test();
+		}
 		Sleep(1);
 	}
 
