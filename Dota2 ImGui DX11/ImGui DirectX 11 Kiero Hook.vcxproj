@@ -197,7 +197,6 @@
     <ClInclude Include="sdk\Convar.h" />
     <ClInclude Include="sdk\IAppSystem.h" />
     <ClInclude Include="sdk\ICVar.h" />
-    <ClInclude Include="sdk\IEngineClient.h" />
     <ClInclude Include="utilities.h" />
     <ClInclude Include="vmt.h" />
   </ItemGroup>

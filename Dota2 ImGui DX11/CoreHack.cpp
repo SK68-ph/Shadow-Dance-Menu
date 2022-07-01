@@ -4,9 +4,9 @@
 #include "Schema.h"
 #include "sdk/CGameEntitySystem.h"
 #include "sdk/IAppSystem.h"
-#include "sdk/IEngineClient.h"
 #include "sdk/ICVar.h"
 
+class IEngineClient;
 
 VMT* entityVMT;
 CGameEntitySystem* entity;

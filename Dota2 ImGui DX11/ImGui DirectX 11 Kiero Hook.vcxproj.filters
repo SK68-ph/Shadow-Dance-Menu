@@ -172,9 +172,6 @@
     <ClInclude Include="sdk\Convar.h">
       <Filter>sdk</Filter>
     </ClInclude>
-    <ClInclude Include="sdk\IEngineClient.h">
-      <Filter>sdk</Filter>
-    </ClInclude>
     <ClInclude Include="Schema.h">
       <Filter>Hack</Filter>
     </ClInclude>
