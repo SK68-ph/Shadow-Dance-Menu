@@ -81,10 +81,12 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LibraryPath>D:\Programs\MSDirectX-SDK\Lib\x64;$(LibraryPath)</LibraryPath>
     <IncludePath>D:\Programs\MSDirectX-SDK\Include;$(IncludePath)</IncludePath>
+    <TargetName>SimpleHackMenuDota2</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LibraryPath>D:\Programs\MSDirectX-SDK\Lib\x64;$(LibraryPath)</LibraryPath>
     <IncludePath>D:\Programs\MSDirectX-SDK\Include;$(IncludePath)</IncludePath>
+    <TargetName>SimpleHackMenuDota2</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
