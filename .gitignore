@@ -110,3 +110,6 @@ Dota2 ImGui DX11/x64/Release/CodeAnalysisResultManifest.txt
 Dota2 ImGui DX11/x64/Release/main.nativecodeanalysis.sarif
 *.log
 x64/Release/Simple Hack Menu.dll.lastcodeanalysissucceeded
+*.vsidx
+*.vsidx
+.vs/Simple Hack Menu/FileContentIndex/424267ad-520b-40fb-a99f-9014720f2e4e.vsidx
