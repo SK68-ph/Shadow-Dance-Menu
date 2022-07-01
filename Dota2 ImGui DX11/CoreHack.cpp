@@ -7,13 +7,75 @@ std::vector<unsigned int> Indexes;
 VMT* entityVMT;
 #define cc const char*
 #define ui unsigned long long
+#define u64 unsigned long long
 #define VT_METHOD(region, index) (*(ui*)(*(ui*)region + index * 8))
 typedef ui(__fastcall* fGLocalPlayerentindex)(ui self, ui ptrtoint, ui zero);
 fGLocalPlayerentindex GLocalPlayer;
 int LocalPlayerIndex = -1;
 ui SchemaSystem;
-ui m_bIsLocalPlayer,m_hOwnerEntity, m_flStartSequenceCycle;
+ui m_iTeamNum,m_hOwnerEntity, m_flStartSequenceCycle, m_fGameTime, m_nGameState, m_lifeState,
+m_iGameMode, m_clrRender, m_hReplicatingOtherHeroModel;
+template<typename T, typename Z>
+bool StringsMatch(T a, Z b) {
+    return !strcmp((cc)a, (cc)b);
+}
+class ENTITY;
+class CHANDLE {
+public:
+    int handle;
+    short Index() {
+        return handle & 0x7fff;
+    }
+};
+class CENTITYIDENTITY {
+public:
+    ENTITY* entity;//0
+    u64 baseinfo;//8
+    CHANDLE handle;//10
+private:
+    int unk;//14
+public:
+    cc name;//18
+    cc designer_name;
+    char pad[0x30];
+    CENTITYIDENTITY* m_pNext;//20
+};
 
+class ENTITY {
+public:
+    u64 unk;
+    CENTITYIDENTITY* identity;
+    ENTITY* Next() {
+        if (!identity->m_pNext) return 0;
+        return identity->m_pNext->entity;
+    }
+    int CHandle() {
+        return identity->handle.handle;
+    }
+    short Index() {
+        return identity->handle.Index();
+    }
+    cc BaseClass() {
+        if (
+            !identity || !identity->baseinfo
+            ) return 0;
+        return **(const char***)(
+            identity->baseinfo
+            );
+    }
+    bool OfBaseClass(cc bc) {
+        return StringsMatch(BaseClass(), bc);
+    }
+    bool IsHero() {
+        return OfBaseClass("C_DOTA_BaseNPC_Hero");
+    }
+    cc name() {
+        return identity->name;
+    }
+    cc designername() {
+        return identity->designer_name;
+    }
+};
 template <typename I> std::string n2hexstr(I w, size_t hex_len = sizeof(I) << 1) {
     static const char* digits = "0123456789ABCDEF";
     std::string rc(hex_len, '0');
@@ -197,9 +259,8 @@ CEntityInstance* OnAddEntity(CGameEntitySystem* ecx, CEntityInstance* ptr, Entit
         if (!alreadyExists)
         {
                 int EntityIndex = index & 0x7FFF;
-                ptr->C_BaseEntity__DrawEntityDebugOverlays(ABSBOX);
                 Heroes.emplace_back(ptr);
-                std::cout << typeName << std::hex << " Addr = " << (uintptr_t)ptr << " " << EntityIndex << std::endl;
+                std::cout << typeName << std::hex << " Addr = " << (uintptr_t)ptr << " " << std::dec << EntityIndex << std::endl;
         }
     }
 
@@ -243,22 +304,30 @@ void InitHack() {
 
     SchemaSystem = (ui)utilities::GetInterface("schemasystem.dll", "SchemaSystem_001");
     Netvars = new SchemaNetvarCollection;
-    //Netvars->Add("C_BaseEntity", "client.dll");
-    Netvars->Add("CBasePlayerController", "client.dll");
-    Netvars->Add("C_DOTAPlayerController", "client.dll");
-    //Netvars->Add("CGameSceneNode", "client.dll");
+    Netvars->Add("C_BaseEntity", "client.dll");
+    Netvars->Add("CGameSceneNode", "client.dll");
     Netvars->Add("C_DOTA_BaseNPC", "client.dll");
     Netvars->Add("C_DOTA_BaseNPC_Hero", "client.dll");
-    //Netvars->Add("C_DOTABaseAbility", "client.dll");
-    //Netvars->Add("C_DOTAGamerules", "client.dll");
-    //Netvars->Add("C_BaseModelEntity", "client.dll");
-    //Netvars->Add("CGlowProperty", "client.dll");
-    m_bIsLocalPlayer = Netvars->Get((ui)"m_iMaxHealth")->offset;
-    m_flStartSequenceCycle = Netvars->Get((ui)"m_flStartSequenceCycle")->offset;
+    Netvars->Add("C_DOTABaseAbility", "client.dll");
+    Netvars->Add("C_DOTAGamerules", "client.dll");
+    Netvars->Add("C_BaseModelEntity", "client.dll");
+    Netvars->Add("CGlowProperty", "client.dll");
+    Netvars->Add("C_EconEntity", "client.dll");
+    Netvars->Add("CAttributeContainer", "client.dll");
+    Netvars->Add("CEconItemView", "client.dll");
+    Netvars->Add("C_DOTAWearableItem", "client.dll");
+    Netvars->Add("C_BaseCombatCharacter", "client.dll");
+    m_iTeamNum = Netvars->Get((ui)"m_iTeamNum")->offset;
     m_hOwnerEntity = Netvars->Get((ui)"m_hOwnerEntity")->offset;
-    std::cout  << m_bIsLocalPlayer << std::endl;
+    m_clrRender = Netvars->Get((ui)"m_clrRender")->offset;
+    m_flStartSequenceCycle = Netvars->Get((ui)"m_flStartSequenceCycle")->offset;
+    m_fGameTime = Netvars->Get((ui)"m_fGameTime")->offset;
+    m_nGameState = Netvars->Get((ui)"m_nGameState")->offset;
+    m_iGameMode = Netvars->Get((ui)"m_iGameMode")->offset;
+    m_hReplicatingOtherHeroModel = Netvars->Get((ui)"m_hReplicatingOtherHeroModel")->offset;
+    m_lifeState = Netvars->Get((ui)"m_lifeState")->offset;
     std::cout  << m_flStartSequenceCycle << std::endl;
-    std::cout  << m_hOwnerEntity << std::endl;
+    std::cout  << m_iTeamNum << std::endl;
 }
 
 void ExitHack()
@@ -272,18 +341,40 @@ bool isEntityPopulated()
     return (Heroes.size() > 0);
 }
 
-int testt = 0;
-int& GetLocalPlayer(int& = testt, int screen = 0) {
+int localIndex = -1;
+int& GetLocalPlayer(int& = localIndex, int screen = 0) {
     typedef int& (*Fn)(void*, int&, int);
-    return getvfunc<Fn>(engine, 22)(engine, testt, screen);
+    return getvfunc<Fn>(engine, 22)(engine, localIndex, screen);
 }
-
+std::vector<ENTITY*> testEnt;
 //int testt2 = 0;
 void test()
 {
+    GetLocalPlayer(localIndex);
+    short localEnt = localIndex + 1;
 
-    //GetLocalPlayer(testt);
-    //CEntityInstance* gg = (CEntityInstance*)entity->GetBaseEntity(testt + 1);
+    if (testEnt.size()==0)
+    {
+        for (size_t i = 0; i < Heroes.size(); i++)
+        {
+            testEnt.push_back((ENTITY*)((u64)Heroes[i]));
+            int handle = *(int*)((u64)testEnt[i] + m_hOwnerEntity);
+            handle = handle & 0x7FFF;
+            std::cout << "FOUND handle = " << handle << " size = " << i << std::endl;
+        }
+    }
+    std::cout << "FOUND localindex = " << localEnt << " size = " << testEnt.size() << std::endl;
+    //for (size_t i = 0; i < testEnt.size(); i++)
+    //{
+    //    CHANDLE handle = *(CHANDLE*)((u64)testEnt[i] + m_hOwnerEntity);
+    //    localEnt = & 0x7fff;
+    //    std::cout << "LocalENT = " << localEnt << " size = " << i << std::endl;
+    //    if (testEnt[i]->Index() == localEnt) {
+    //        std::cout << "FOUND !" << (u64)testEnt[i] << std::endl;
+    //        continue;
+    //    }
+    //}
+    
 }
 
 int getVBE() {
