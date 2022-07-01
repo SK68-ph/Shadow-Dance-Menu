@@ -16,7 +16,6 @@ FILE* f;
 HMODULE hModule;
 ImFont* mainFont;
 ImFont* vbeFont;
-ConVars convar;
 
 void InitImGui()
 {
@@ -119,7 +118,6 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 			item_current = 0;
 			bNoFog = false;
 			bParticleHack = false;
-			convar.ResetConvars();
 		}
 		ImGui::End();
 		ImGui::PopFont();
@@ -149,7 +147,7 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 		}
 		if (weather_item != item_current)
 		{
-			convar.weather->SetValue(item_current);
+			SetWeather(item_current);
 		}
 		if (tempBDrawRange != bDrawRange)
 		{
@@ -157,21 +155,20 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 				rangeVal = 1200;
 			else
 				rangeVal = 0;
-			convar.sv_cheats->SetValue(1);
-			convar.drawrange->SetValue(rangeVal);
+			SetDrawRange(rangeVal);
 		}
 		if (tempBParticleHack != bParticleHack)
 		{
-			convar.particle_hack->SetValue(!bParticleHack);
+			SetParticleHack(!bParticleHack);
 		}
 		if (tempBNoFog != bNoFog)
 		{
-			convar.fog_enable->SetValue(!bNoFog);
+			SetNoFog(!bNoFog);
 		}
 		if (tempcamDistance != camDistance)
 		{
-			convar.camera_distance->SetValue(camDistance);
-			convar.r_farz->SetValue(camDistance * 2);
+			SetCamDistance(camDistance);
+
 		}
 
 		tempBVBE = bVBE, tempBDrawRange = bDrawRange, tempBParticleHack = bParticleHack, tempBNoFog = bNoFog;
@@ -192,7 +189,7 @@ DWORD WINAPI MainThread(HMODULE hModule)
 	FILE* f;
 	freopen_s(&f, "CONOUT$", "w", stdout);
 
-	convar.InitConvars();
+	
 	InitHack();
 	bool init_hook = false;
 	do
@@ -207,10 +204,6 @@ DWORD WINAPI MainThread(HMODULE hModule)
 
 	while (!GetAsyncKeyState(VK_END) && Exit == false)
 	{
-		if (GetAsyncKeyState(VK_DELETE) & 1)
-		{
-			test();
-		}
 		Sleep(1);
 	}
 
