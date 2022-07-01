@@ -37,7 +37,7 @@ LRESULT __stdcall WndProc(const HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 }
 
 // Features Vars
-bool bVBE = false, bDrawRange = false, bParticleHack = false, bNoFog = false, bVbeScan = true;
+bool bVBE = false, bVBEParticle = false, bDrawRange = false, bParticleHack = false, bNoFog = false;
 const char* weatherList[] = { "Default", "Winter", " Rain", "MoonBeam", "Pestilence", "Harvest", "Sirocco", "Spring", "Ash", "Aurora" };
 int camDistance = 1200, rangeVal = 1200;
 int prevVbe;
@@ -93,12 +93,21 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 	if (bShowMenu)
 	{
 		ImGui::PushFont(mainFont);
-		ImGui::Begin("Simple Dota2 Menu");
-
+		ImGui::Begin("Simple Dota2 Hack Menu");
 		ImGui::Text("Visuals");
-		ImGui::Checkbox("Overlay Visible by enemy.", &bVBE);
+		if (ImGui::TreeNode("Visible by enemy")){
+		ImGui::Checkbox("Overlay Text.", &bVBE);
+		ImGui::Checkbox("Particle.(Soon)", &bVBEParticle);
+		ImGui::TreePop();
+		}
+		ImGui::Checkbox("No Map Fog.", &bNoFog);
 		ImGui::Checkbox("Draw Blink Dagger Circle Range.", &bDrawRange);
-		ImGui::SliderInt("CameraDistance", &camDistance, 0, 3000, "%d");
+		ImGui::Text("CameraDistance");
+		ImGui::SliderInt("", &camDistance, 0, 3000, "%d");
+		ImGui::SameLine();
+		if (ImGui::Button("Reset", ImVec2(70, 20))) {
+			camDistance = 1200;
+		}
 
 		ImGui::Dummy(ImVec2(1, 10));
 		ImGui::Text("Weather");
@@ -108,16 +117,6 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 		ImGui::Text("Hacks");
 		ImGui::Checkbox("No Map Fog.", &bNoFog);
 		ImGui::Checkbox("Particle Map Hack.", &bParticleHack);
-
-		ImGui::Dummy(ImVec2(1, 5));
-		if (ImGui::Button("Reset Options", ImVec2(90, 20))) {
-			bVBE = false;
-			bDrawRange = 0;
-			camDistance = 1200;
-			item_current = 0;
-			bNoFog = false;
-			bParticleHack = false;
-		}
 		ImGui::End();
 		ImGui::PopFont();
 	}
@@ -127,8 +126,15 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 		if (bVBE)
 		{
 			ImGui::PushFont(vbeFont);
-			ImGui::SetNextWindowSize(ImVec2(vbeFont->FontSize * 6, vbeFont->FontSize * 2));
-			ImGui::Begin("VBE", NULL, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar);
+			//ImGui::SetNextWindowSize(ImVec2(vbeFont->FontSize, vbeFont->FontSize ));
+			if (!bShowMenu)
+			{
+				ImGui::Begin("VBE", NULL, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoMove);
+			}
+			else
+			{
+				ImGui::Begin("VBE", NULL,  ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar );
+			}
 			int VBE = getVBE();
 			Sleep(1);
 			if (VBE == 0 && prevVbe == 0) // Visible by enemy
