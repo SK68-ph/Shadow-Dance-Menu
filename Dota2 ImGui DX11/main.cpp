@@ -100,7 +100,6 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 		ImGui::Checkbox("Particle.(Soon)", &bVBEParticle);
 		ImGui::TreePop();
 		}
-		ImGui::Checkbox("No Map Fog.", &bNoFog);
 		ImGui::Checkbox("Draw Blink Dagger Circle Range.", &bDrawRange);
 		ImGui::Text("CameraDistance");
 		ImGui::SliderInt("", &camDistance, 0, 3000, "%d");
@@ -203,12 +202,12 @@ DWORD WINAPI MainThread(HMODULE hModule)
 			init_hook = true;
 		}
 	} while (!init_hook);
-
+	MessageBeep(MB_OK);
 	while (!GetAsyncKeyState(VK_END) && Exit == false)
 	{
 		Sleep(1);
 	}
-
+	MessageBeep(MB_OK);
 	Exit = true;
 	kiero::shutdown();
 	ExitHack();
