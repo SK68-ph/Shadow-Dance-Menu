@@ -171,7 +171,6 @@
   <ItemGroup>
     <ClInclude Include="common.h" />
     <ClInclude Include="CoreHack.h" />
-    <ClInclude Include="Header.h" />
     <ClInclude Include="imgui\imconfig.h" />
     <ClInclude Include="imgui\imgui.h" />
     <ClInclude Include="imgui\imgui_impl_dx11.h" />
@@ -191,7 +190,8 @@
     <ClInclude Include="kiero\minhook\src\hde\table32.h" />
     <ClInclude Include="kiero\minhook\src\hde\table64.h" />
     <ClInclude Include="kiero\minhook\src\trampoline.h" />
-    <ClInclude Include="sdk\CEntityInstance.h" />
+    <ClInclude Include="Schema.h" />
+    <ClInclude Include="sdk\C_BaseEntity.h" />
     <ClInclude Include="sdk\CGameEntitySystem.h" />
     <ClInclude Include="sdk\color.h" />
     <ClInclude Include="sdk\Convar.h" />

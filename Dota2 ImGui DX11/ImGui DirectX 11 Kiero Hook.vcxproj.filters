@@ -163,7 +163,7 @@
     <ClInclude Include="vmt.h">
       <Filter>Utils</Filter>
     </ClInclude>
-    <ClInclude Include="sdk\CEntityInstance.h">
+    <ClInclude Include="sdk\C_BaseEntity.h">
       <Filter>sdk</Filter>
     </ClInclude>
     <ClInclude Include="sdk\CGameEntitySystem.h">
@@ -175,7 +175,7 @@
     <ClInclude Include="sdk\IEngineClient.h">
       <Filter>sdk</Filter>
     </ClInclude>
-    <ClInclude Include="Header.h">
+    <ClInclude Include="Schema.h">
       <Filter>Hack</Filter>
     </ClInclude>
   </ItemGroup>
