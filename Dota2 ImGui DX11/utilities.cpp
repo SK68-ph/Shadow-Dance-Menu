@@ -64,12 +64,3 @@ bool utilities::validateAddr(uintptr_t base) {
         return 0;
     return 1;
 }
-
-void* utilities::GetInterface(const char* dllname, const char* interfacename) {
-    CreateInterfaceFn CreateInterface = reinterpret_cast<CreateInterfaceFn>(GetProcAddress(GetModuleHandle(dllname), "CreateInterface"));
-
-    int returnCode = 0;
-    void* Interface = CreateInterface(interfacename, &returnCode);
-
-    return Interface;
-}
