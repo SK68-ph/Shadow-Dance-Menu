@@ -81,10 +81,12 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LibraryPath>D:\Programs\MSDirectX-SDK\Lib\x64;$(LibraryPath)</LibraryPath>
     <IncludePath>D:\Programs\MSDirectX-SDK\Include;$(IncludePath)</IncludePath>
+    <TargetName>SimpleHackMenuDota2</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LibraryPath>D:\Programs\MSDirectX-SDK\Lib\x64;$(LibraryPath)</LibraryPath>
     <IncludePath>D:\Programs\MSDirectX-SDK\Include;$(IncludePath)</IncludePath>
+    <TargetName>SimpleHackMenuDota2</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -190,7 +192,11 @@
     <ClInclude Include="kiero\minhook\src\hde\table32.h" />
     <ClInclude Include="kiero\minhook\src\hde\table64.h" />
     <ClInclude Include="kiero\minhook\src\trampoline.h" />
+    <ClInclude Include="Schema.h" />
+    <ClInclude Include="sdk\C_BaseEntity.h" />
+    <ClInclude Include="sdk\CGameEntitySystem.h" />
     <ClInclude Include="sdk\color.h" />
+    <ClInclude Include="sdk\Convar.h" />
     <ClInclude Include="sdk\IAppSystem.h" />
     <ClInclude Include="sdk\ICVar.h" />
     <ClInclude Include="utilities.h" />

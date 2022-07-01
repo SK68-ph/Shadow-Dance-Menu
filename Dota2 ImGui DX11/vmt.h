@@ -36,15 +36,15 @@ public:
 	}
 
 	template<typename Fn>
-	auto GetOriginalMethod(Fn& ref, size_t index)
-	{
-		return reinterpret_cast<decltype(&ref)>(original_vmt[index]);
-	}
-
-	template<typename Fn>
 	auto GetOriginalMethod(Fn& ref)
 	{
 		return GetOriginalMethod(ref, map[(uintptr_t)ref]);
+	}
+
+	template<typename Fn>
+	auto GetOriginalMethod(Fn& ref, size_t index)
+	{
+		return reinterpret_cast<decltype(&ref)>(original_vmt[index]);
 	}
 
 	void RevertVMT(void* instance)
@@ -62,4 +62,5 @@ public:
 		VirtualProtect(*Interface, sizeof(uintptr_t), PAGE_READWRITE, (PDWORD)&_old);
 		*Interface = &vmt[1];
 	}
+
 };

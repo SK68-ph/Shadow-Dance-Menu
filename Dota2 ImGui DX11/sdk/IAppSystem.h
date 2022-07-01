@@ -25,8 +25,6 @@ enum AppSystemTier_t
     APP_SYSTEM_TIER_OTHER,
 };
 
-typedef void* (*CreateInterfaceFn)(const char* pName, int* pReturnCode);
-
 /* Things that at the start of the Officially exported Interfaces */
 /* Note that some classes may not include all of these */
 class IAppSystem

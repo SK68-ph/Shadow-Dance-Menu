@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "sdk/color.h"
+#include "color.h"
 
 class ConCommandBase {
 public:

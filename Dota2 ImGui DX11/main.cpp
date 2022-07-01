@@ -16,10 +16,6 @@ FILE* f;
 HMODULE hModule;
 ImFont* mainFont;
 ImFont* vbeFont;
-Hack::ConVars convar;
-
-
-
 
 void InitImGui()
 {
@@ -40,15 +36,15 @@ LRESULT __stdcall WndProc(const HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 	return CallWindowProc(oWndProc, hWnd, uMsg, wParam, lParam);
 }
 
-// Vars
-bool bVBE = false, bDrawRange = false, bParticleHack = false, bNoFog = false, bVbeScan = true;
+// Features Vars
+bool bVBE = false, bVBEParticle = false, bDrawRange = false, bParticleHack = false, bNoFog = false;
 const char* weatherList[] = { "Default", "Winter", " Rain", "MoonBeam", "Pestilence", "Harvest", "Sirocco", "Spring", "Ash", "Aurora" };
 int camDistance = 1200, rangeVal = 1200;
 int prevVbe;
-static int item_current = 0;
-bool init = false;
-bool Exit = false;
-bool bShowMenu = true;
+int item_current = 0;
+
+// Imgui Vars
+bool init = false, Exit = false, bShowMenu = true;
 
 HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT Flags)
 {
@@ -60,10 +56,8 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 
 	if (!init)
 	{
-		Hack::InitHack();
 		if (SUCCEEDED(pSwapChain->GetDevice(__uuidof(ID3D11Device), (void**)& pDevice)))
 		{
-			std::cout << "Initialized ImGui" << std::endl;
 			pDevice->GetImmediateContext(&pContext);
 			DXGI_SWAP_CHAIN_DESC sd;
 			pSwapChain->GetDesc(&sd);
@@ -76,7 +70,6 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 			InitImGui();
 			IM_ASSERT(ImGui::GetCurrentContext() != NULL && "Missing dear imgui context. Refer to examples app!");
 			init = true;
-			convar.InitConvars();
 		}
 
 		else
@@ -89,9 +82,9 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 	}
 
 	//temporary vars
-	bool tempBVBE = bVBE, tempBDrawRange = bDrawRange, tempBParticleHack = bParticleHack, tempBNoFog = bNoFog;
-	int tempBcamDistance = camDistance;
-	int weather_item = item_current;
+	int tempBVBE = -1, tempBDrawRange = -1, tempBParticleHack = -1, tempBNoFog = -1;
+	int tempcamDistance = -1;
+	int weather_item = -1;
 	ImGui_ImplDX11_NewFrame();
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
@@ -100,12 +93,21 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 	if (bShowMenu)
 	{
 		ImGui::PushFont(mainFont);
-		ImGui::Begin("Simple Dota2 Menu");
-
+		ImGui::Begin("Simple Dota2 Hack Menu");
 		ImGui::Text("Visuals");
-		ImGui::Checkbox("Overlay Visible by enemy.", &bVBE);
+		if (ImGui::TreeNode("Visible by enemy")){
+		ImGui::Checkbox("Overlay Text.", &bVBE);
+		ImGui::Checkbox("Particle.(Soon)", &bVBEParticle);
+		ImGui::TreePop();
+		}
+		ImGui::Checkbox("No Map Fog.", &bNoFog);
 		ImGui::Checkbox("Draw Blink Dagger Circle Range.", &bDrawRange);
-		ImGui::SliderInt("CameraDistance", &camDistance, 0, 3000, "%d");
+		ImGui::Text("CameraDistance");
+		ImGui::SliderInt("", &camDistance, 0, 3000, "%d");
+		ImGui::SameLine();
+		if (ImGui::Button("Reset", ImVec2(70, 20))) {
+			camDistance = 1200;
+		}
 
 		ImGui::Dummy(ImVec2(1, 10));
 		ImGui::Text("Weather");
@@ -115,77 +117,67 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 		ImGui::Text("Hacks");
 		ImGui::Checkbox("No Map Fog.", &bNoFog);
 		ImGui::Checkbox("Particle Map Hack.", &bParticleHack);
-
-		ImGui::Dummy(ImVec2(1, 5));
-		if (ImGui::Button("Reset Options", ImVec2(90, 20))) {
-			bVBE = false;
-			bDrawRange = 0;
-			camDistance = 1200;
-			item_current = 0;
-			bNoFog = false;
-			bParticleHack = false;
-		}
-		ImGui::SameLine();
-
-		static bool clicked = false;
-		if (ImGui::Button("Rescan VBE", ImVec2(90, 20)))
-		{
-			bVBE = false;
-			Hack::ScanVbeOffset(bVbeScan);
-			bVbeScan = !bVbeScan;
-		}
-		
-
 		ImGui::End();
 		ImGui::PopFont();
 	}
 
-	if (bVBE)
+	if (isEntityPopulated())
 	{
-		ImGui::PushFont(vbeFont);
-		ImGui::SetNextWindowSize(ImVec2(vbeFont->FontSize * 6, vbeFont->FontSize * 2));
-		ImGui::Begin("VBE", NULL, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoResize |ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar);
-		int VBE = Hack::getVBE();
-		if (VBE == 0 && prevVbe == 0) // Visible by enemy
+		if (bVBE)
 		{
-			ImGui::TextColored(ImVec4(255, 0, 0, 255), "Visible");
+			ImGui::PushFont(vbeFont);
+			//ImGui::SetNextWindowSize(ImVec2(vbeFont->FontSize, vbeFont->FontSize ));
+			if (!bShowMenu)
+			{
+				ImGui::Begin("VBE", NULL, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoMove);
+			}
+			else
+			{
+				ImGui::Begin("VBE", NULL,  ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar );
+			}
+			int VBE = getVBE();
+			Sleep(1);
+			if (VBE == 0 && prevVbe == 0) // Visible by enemy
+			{
+				ImGui::TextColored(ImVec4(255, 0, 0, 255), "Visible");
+			}
+			else if (VBE == -1)
+			{
+				bVBE = false;
+			}
+			prevVbe = VBE;
+			ImGui::End();
+			ImGui::PopFont();
 		}
-		else if(VBE == -1)
+		if (weather_item != item_current)
 		{
-			bVBE = false;
-			std::cout << "VBE failed, disabling" << std::endl;
+			SetWeather(item_current);
 		}
-		Sleep(1);
-		prevVbe = VBE;
-		ImGui::End();
-		ImGui::PopFont();
-	}
+		if (tempBDrawRange != bDrawRange)
+		{
+			if (bDrawRange)
+				rangeVal = 1200;
+			else
+				rangeVal = 0;
+			SetDrawRange(rangeVal);
+		}
+		if (tempBParticleHack != bParticleHack)
+		{
+			SetParticleHack(!bParticleHack);
+		}
+		if (tempBNoFog != bNoFog)
+		{
+			SetNoFog(!bNoFog);
+		}
+		if (tempcamDistance != camDistance)
+		{
+			SetCamDistance(camDistance);
 
-	if (weather_item != item_current)
-	{
-		convar.weather->SetValue(item_current);
-	}
-	if (tempBDrawRange != bDrawRange)
-	{
-		if (bDrawRange)
-			rangeVal = 1200;
-		else
-			rangeVal = 0;
-		convar.sv_cheats->SetValue(1);
-		convar.drawrange->SetValue(rangeVal);
-	}
-	if (tempBParticleHack != bParticleHack)
-	{
-		convar.particle_hack->SetValue(!bParticleHack);
-	}
-	if (tempBNoFog != bNoFog)
-	{
-		convar.fog_enable->SetValue(!bNoFog);
-	}
-	if (tempBcamDistance != camDistance)
-	{
-		convar.camera_distance->SetValue(camDistance);
-		convar.r_farz->SetValue(camDistance * 2);
+		}
+
+		tempBVBE = bVBE, tempBDrawRange = bDrawRange, tempBParticleHack = bParticleHack, tempBNoFog = bNoFog;
+		tempcamDistance = camDistance;
+		weather_item = item_current;
 	}
 
 	ImGui::Render();
@@ -197,10 +189,11 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 
 DWORD WINAPI MainThread(HMODULE hModule)
 {
-	AllocConsole();
-	FILE* f;
-	freopen_s(&f, "CONOUT$", "w", stdout);
+	//AllocConsole();
+	//FILE* f;
+	//freopen_s(&f, "CONOUT$", "w", stdout);
 
+	InitHack();
 	bool init_hook = false;
 	do
 	{
@@ -208,19 +201,19 @@ DWORD WINAPI MainThread(HMODULE hModule)
 		{
 			kiero::bind(8, (void**)& oPresent, hkPresent);
 			init_hook = true;
-			std::cout << "Successfully Hooked Render Present" << std::endl;
 		}
 	} while (!init_hook);
 
-	while (!GetAsyncKeyState(VK_DELETE) && Exit == false)
+	while (!GetAsyncKeyState(VK_END) && Exit == false)
 	{
 		Sleep(1);
 	}
 
 	Exit = true;
 	kiero::shutdown();
-	fclose(f);
-	FreeConsole();
+	ExitHack();
+	//fclose(f);
+	//FreeConsole();
 	FreeLibraryAndExitThread(hModule, 0);
 }
 
