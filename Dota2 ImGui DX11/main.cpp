@@ -58,7 +58,6 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 	{
 		if (SUCCEEDED(pSwapChain->GetDevice(__uuidof(ID3D11Device), (void**)& pDevice)))
 		{
-			std::cout << "Initialized ImGui" << std::endl;
 			pDevice->GetImmediateContext(&pContext);
 			DXGI_SWAP_CHAIN_DESC sd;
 			pSwapChain->GetDesc(&sd);
@@ -139,7 +138,6 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 			else if (VBE == -1)
 			{
 				bVBE = false;
-				std::cout << "VBE failed, disabling" << std::endl;
 			}
 			prevVbe = VBE;
 			ImGui::End();
@@ -185,11 +183,10 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 
 DWORD WINAPI MainThread(HMODULE hModule)
 {
-	AllocConsole();
-	FILE* f;
-	freopen_s(&f, "CONOUT$", "w", stdout);
+	//AllocConsole();
+	//FILE* f;
+	//freopen_s(&f, "CONOUT$", "w", stdout);
 
-	
 	InitHack();
 	bool init_hook = false;
 	do
@@ -198,7 +195,6 @@ DWORD WINAPI MainThread(HMODULE hModule)
 		{
 			kiero::bind(8, (void**)& oPresent, hkPresent);
 			init_hook = true;
-			std::cout << "Successfully Hooked Render Present" << std::endl;
 		}
 	} while (!init_hook);
 
@@ -210,8 +206,8 @@ DWORD WINAPI MainThread(HMODULE hModule)
 	Exit = true;
 	kiero::shutdown();
 	ExitHack();
-	fclose(f);
-	FreeConsole();
+	//fclose(f);
+	//FreeConsole();
 	FreeLibraryAndExitThread(hModule, 0);
 }
 

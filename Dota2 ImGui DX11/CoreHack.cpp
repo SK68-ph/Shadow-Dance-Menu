@@ -44,7 +44,6 @@ C_BaseEntity* OnAddEntity(CGameEntitySystem* ecx, C_BaseEntity* ptr, EntityHandl
         {
                 int EntityIndex = index & 0x7FFF;
                 Heroes.emplace_back(ptr);
-                std::cout << typeName << std::hex << " Addr = " << (uintptr_t)ptr << " " << std::dec << EntityIndex << std::endl;
         }
     }
 
@@ -69,7 +68,6 @@ C_BaseEntity* OnRemoveEntity(CGameEntitySystem* ecx, C_BaseEntity* ptr, EntityHa
 
 void InitConvars() {
     cvar = (ICvar*)GetInterface("tier0.dll", "VEngineCvar007");
-    std::cout << "Found cvar address = " << cvar << std::endl;
     sv_cheats = cvar->FindCommandBase("sv_cheats");
     camera_distance = cvar->FindCommandBase("dota_camera_distance");
     drawrange = cvar->FindCommandBase("dota_range_display");
@@ -118,8 +116,6 @@ void InitSchema() {
     m_iGameMode = Netvars->Get((u64)"m_iGameMode")->offset;
     m_hReplicatingOtherHeroModel = Netvars->Get((u64)"m_hReplicatingOtherHeroModel")->offset;
     m_lifeState = Netvars->Get((u64)"m_lifeState")->offset;
-    std::cout << std::hex << m_flStartSequenceCycle << std::endl;
-    std::cout << std::hex << m_iTeamNum << std::endl;
 }
 
 void InitHack() {
@@ -157,7 +153,6 @@ int getVBE() {
     {
         GetLocalPlayer(localPlayerIndex);
         localPlayerIndex++;
-        std::cout << "FOUND localindex = " << localPlayerIndex << std::endl;
         if (localPlayerIndex == -1)
         {
             return -1;
@@ -167,11 +162,9 @@ int getVBE() {
     {
         for (size_t i = 0; i < Heroes.size(); i++)
         {
-            std::cout << "FOUND handle = " << Heroes[i]->OwnerIndex() << std::endl;
             if (localPlayerIndex == Heroes[i]->OwnerIndex())
             {
                 localHero = i;
-                std::cout << "FOUND localhero at playerslot_t = " << i << std::endl;
                 break;
             }
 
