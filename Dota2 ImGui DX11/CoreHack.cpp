@@ -124,7 +124,7 @@ void InitHack() {
     InitSchema();
 }
 
-void ExitHack()
+void RemoveVmtHooks()
 {
     entityVMT->RevertVMT(entity); // Unhook entity
 }

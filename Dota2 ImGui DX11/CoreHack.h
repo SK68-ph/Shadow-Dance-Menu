@@ -6,7 +6,7 @@
 
 int getVBE();
 void InitHack();
-void ExitHack();
+void RemoveVmtHooks();
 bool isEntityPopulated();
 void InitConvars();
 void ResetConvars();
