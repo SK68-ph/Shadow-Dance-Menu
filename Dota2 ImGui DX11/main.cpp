@@ -97,7 +97,7 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 		ImGui::Text("Visuals");
 		if (ImGui::TreeNode("Visible by enemy")){
 		ImGui::Checkbox("Overlay Text.", &bVBE);
-		ImGui::Checkbox("Particle.(Soon)", &bVBEParticle);
+		//ImGui::Checkbox("Particle.(Soon)", &bVBEParticle);
 		ImGui::TreePop();
 		}
 		ImGui::Checkbox("Draw Blink Dagger Circle Range.", &bDrawRange);
