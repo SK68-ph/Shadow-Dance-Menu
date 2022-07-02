@@ -51,7 +51,12 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 
 	if (Exit == true)
 	{
-		return oPresent(pSwapChain, SyncInterval, Flags);
+		pDevice->Release();
+		pContext->Release();
+		pSwapChain->Release();
+		oWndProc = (WNDPROC)SetWindowLongPtr(window, GWLP_WNDPROC, (LONG_PTR)(oWndProc));
+		oPresent(pSwapChain, SyncInterval, Flags);
+		return 0;
 	}
 
 	if (!init)
@@ -135,7 +140,6 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 				ImGui::Begin("VBE", NULL,  ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar );
 			}
 			int VBE = getVBE();
-			Sleep(1);
 			if (VBE == 0 && prevVbe == 0) // Visible by enemy
 			{
 				ImGui::TextColored(ImVec4(255, 0, 0, 255), "Visible");
@@ -203,17 +207,22 @@ DWORD WINAPI MainThread(HMODULE hModule)
 		}
 	} while (!init_hook);
 	MessageBeep(MB_OK);
-	while (!GetAsyncKeyState(VK_END) && Exit == false)
+	while (Exit == false)
 	{
-		Sleep(1);
+		if (GetAsyncKeyState(VK_END) & 1)
+		{
+			Exit = true;
+			Sleep(1000);
+			ResetConvars();
+			RemoveVmtHooks();
+			MessageBeep(MB_OK);
+			kiero::shutdown();
+			//fclose(f);
+			//FreeConsole();
+			FreeLibraryAndExitThread(hModule, 0);
+		}
 	}
-	MessageBeep(MB_OK);
-	Exit = true;
-	kiero::shutdown();
-	ExitHack();
-	//fclose(f);
-	//FreeConsole();
-	FreeLibraryAndExitThread(hModule, 0);
+	return 1;
 }
 
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReason, LPVOID lpReserved)
