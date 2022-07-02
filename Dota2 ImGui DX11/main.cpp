@@ -95,11 +95,11 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 		ImGui::PushFont(mainFont);
 		ImGui::Begin("Simple Dota2 Hack Menu");
 		ImGui::Text("Visuals");
-		if (ImGui::TreeNode("Visible by enemy")){
+		//if (ImGui::TreeNode("Visible by enemy")){
 		ImGui::Checkbox("Overlay Text.", &bVBE);
 		//ImGui::Checkbox("Particle.(Soon)", &bVBEParticle);
-		ImGui::TreePop();
-		}
+		//ImGui::TreePop();
+		//}
 		ImGui::Checkbox("Draw Blink Dagger Circle Range.", &bDrawRange);
 		ImGui::Text("CameraDistance");
 		ImGui::SliderInt("", &camDistance, 0, 3000, "%d");
