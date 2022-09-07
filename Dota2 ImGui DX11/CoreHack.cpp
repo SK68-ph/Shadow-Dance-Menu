@@ -21,6 +21,15 @@ ConCommandBase* fog_enable;
 ConCommandBase* weather;
 ConCommandBase* particle_hack;
 SchemaNetvarCollection* Netvars = 0;
+bool isIngame = false;
+
+
+int localHero = -1;
+int localPlayerIndex = -1;
+int& GetLocalPlayer(int& = localPlayerIndex, int screen = 0) {
+    typedef int& (*Fn)(void*, int&, int);
+    return getvfunc<Fn>(engine, 20)(engine, localPlayerIndex, screen);
+}
 
 
 CEntityInstance* OnAddEntity(CGameEntitySystem* ecx, CEntityInstance* ptr, EntityHandle index)
@@ -42,9 +51,8 @@ CEntityInstance* OnAddEntity(CGameEntitySystem* ecx, CEntityInstance* ptr, Entit
 
         if (!alreadyExists)
         {
-                int EntityIndex = index & 0x7FFF;
-                std::cout << typeName << " " << ptr << std::endl;
-                Heroes.push_back(ptr);
+                std::cout << std::hex << typeName << " " << ptr << " EntityHandle Index = " << (index &0x7FFF) << std::endl;
+                Heroes.emplace_back(ptr);
         }
     }
 
@@ -58,8 +66,13 @@ CEntityInstance* OnRemoveEntity(CGameEntitySystem* ecx, CEntityInstance* ptr, En
     if (strstr(typeName, "DOTA_Unit_Hero")) {
         for (size_t i = Heroes.size(); i-- > 0; ) {
             if (Heroes[i] == ptr) {
-                std::cout << typeName << std::endl;
                 Heroes.erase(Heroes.begin() + i);
+                std::cout << typeName << "List count = " << Heroes.size() << std::endl;
+                if (Heroes.size() == 0)
+                {
+                    localHero = -1;
+                    std::cout << "not populated" << std::endl;
+                }
                 break;
             }
         }
@@ -96,30 +109,28 @@ void InitSchema() {
     CMsg = (ConMsg)GetProcAddress(GetModuleHandleA("tier0.dll"), "Msg");
     SchemaSystem = (u64)GetInterface("schemasystem.dll", "SchemaSystem_001");
     Netvars = new SchemaNetvarCollection;
-    Netvars->Add("C_BaseEntity", "client.dll");
-    Netvars->Add("CGameSceneNode", "client.dll");
     Netvars->Add("C_DOTA_BaseNPC", "client.dll");
     Netvars->Add("C_DOTA_BaseNPC_Hero", "client.dll");
     Netvars->Add("C_DOTABaseAbility", "client.dll");
     Netvars->Add("C_DOTAGamerules", "client.dll");
+    Netvars->Add("C_BaseEntity", "client.dll");
     Netvars->Add("C_BaseModelEntity", "client.dll");
-    Netvars->Add("CGlowProperty", "client.dll");
-    Netvars->Add("C_EconEntity", "client.dll");
-    Netvars->Add("CAttributeContainer", "client.dll");
-    Netvars->Add("CEconItemView", "client.dll");
-    Netvars->Add("C_DOTAWearableItem", "client.dll");
     Netvars->Add("C_BaseCombatCharacter", "client.dll");
+    //Netvars->Add("CGlowProperty", "client.dll");
+    //Netvars->Add("C_EconEntity", "client.dll");
+    //Netvars->Add("CAttributeContainer", "client.dll");
+    //Netvars->Add("CEconItemView", "client.dll");
+    //Netvars->Add("C_DOTAWearableItem", "client.dll");
+    //Netvars->Add("CGameSceneNode", "client.dll");
     m_iTeamNum = Netvars->Get((u64)"m_iTeamNum")->offset;
     m_hOwnerEntity = Netvars->Get((u64)"m_hOwnerEntity")->offset;
-    m_clrRender = Netvars->Get((u64)"m_clrRender")->offset;
+    //m_clrRender = Netvars->Get((u64)"m_clrRender")->offset;
     m_flStartSequenceCycle = Netvars->Get((u64)"m_flStartSequenceCycle")->offset;
     m_fGameTime = Netvars->Get((u64)"m_fGameTime")->offset;
     m_nGameState = Netvars->Get((u64)"m_nGameState")->offset;
     m_iGameMode = Netvars->Get((u64)"m_iGameMode")->offset;
     m_hReplicatingOtherHeroModel = Netvars->Get((u64)"m_hReplicatingOtherHeroModel")->offset;
     m_lifeState = Netvars->Get((u64)"m_lifeState")->offset;
-    std::cout << "vbe =" << m_flStartSequenceCycle << std::endl;
-    std::cout << "m_hOwnerEntity =" << m_hOwnerEntity << std::endl;
 }
 
 void InitHack() {
@@ -133,47 +144,30 @@ void RemoveVmtHooks()
     entityVMT->RevertVMT(entity); // Unhook entity
 }
 
-bool isEntityPopulated()
-{
-    return (Heroes.size() > 0);
-}
-
-int localHero = -1;
-int localPlayerIndex = -1;
-int& GetLocalPlayer(int& = localPlayerIndex, int screen = 0) {
-    typedef int& (*Fn)(void*, int&, int);
-    return getvfunc<Fn>(engine, 20)(engine, localPlayerIndex, screen);
-}
-
-
 int getVBE() {
-    if (isEntityPopulated() == false) // check if entity is populated
-    {
+    if (Heroes.size() == 0) {
         std::cout << "not populated" << std::endl;
-        localPlayerIndex = -1;
         localHero = -1;
         return -1;
     }
-    if (localPlayerIndex == -1)
+
+    if (localHero == -1)
     {
         GetLocalPlayer(localPlayerIndex);
         localPlayerIndex++;
-        if (localPlayerIndex == -1)
-        {
-            std::cout << "localP not found" << std::endl;
-            return -1;
-        }
-        std::cout << "localP Index = " << localPlayerIndex << std::endl;
-    }
-    if (localHero == -1)
-    {
+        std::cout << "local PIndex = " << localPlayerIndex << std::endl;
         for (size_t i = 0; i < Heroes.size(); i++)
         {
+            std::cout << "current ENT = " << Heroes[i] << std::endl;
             if (localPlayerIndex == Heroes[i]->OwnerIndex())
             {
                 localHero = i;
                 std::cout << "localHero = " << localPlayerIndex << std::endl;
                 break;
+            }
+            else
+            {
+                localHero = -1;
             }
 
         }
@@ -182,10 +176,13 @@ int getVBE() {
             std::cout << "localHero not found" << std::endl;
             return -1;
         }
+        
     }
 
     auto VBE = Heroes[localHero]->IsVisibleByEnemy(); // vbeoffset = C_BaseEntitye+0x16B0
-    if (VBE)
+    //auto HeroAlive = Heroes[localHero]->IsAlive(); // vbeoffset = C_BaseEntitye+0x16B0
+    //&& HeroAlive == 0
+    if (VBE == true)
     {
         return 0;
     }

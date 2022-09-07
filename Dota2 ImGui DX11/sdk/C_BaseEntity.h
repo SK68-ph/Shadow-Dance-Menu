@@ -59,9 +59,10 @@ public:
             identity->baseinfo
             );
     }
-    short OwnerIndex()
+    int OwnerIndex()
     {
-        return (*(short*)((u64)this + m_hOwnerEntity)) & 0x7FFF;
+        std::cout << std::hex << "Owner Index = " << ((*(int*)((u64)this + m_hOwnerEntity)) & 0x7FFF) << std::endl;
+        return (*(int*)((u64)this + m_hOwnerEntity)) & 0x7FFF;
     }
     bool OfBaseClass(cc bc) {
         return StringsMatch(BaseClass(), bc);
@@ -72,16 +73,15 @@ public:
     bool IsIllusion() {
         return *(int*)((u64)this + m_hReplicatingOtherHeroModel) != -1;
     }
-    bool IsAlive() {
-        enum LifeState : int
-        {
-            UnitAlive = 0, KillCam = 1, UnitDead = 2
-        };
-        return *(int*)((u64)this + m_lifeState) == UnitAlive;
+    int IsAlive() {
+        //enum LifeState : int
+        //{
+        //    UnitAlive = 0, KillCam = 1, UnitDead = 2
+        //};
+        return *(int*)((u64)this + m_lifeState);
     }
     bool IsVisibleByEnemy() {
         float vbe = *(float*)((u64)this + m_flStartSequenceCycle);
-        //float vbe = *(float*)((u64)this + m_flStartSequenceCycle);
         if (vbe >= 0.001 && vbe <= 1)
         {
             return false;
