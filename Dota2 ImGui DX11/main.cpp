@@ -98,7 +98,7 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 	if (bShowMenu)
 	{
 		ImGui::PushFont(mainFont);
-		ImGui::Begin("Simple Dota2 Hack Menu");
+		ImGui::Begin("Simple Menu");
 		ImGui::Text("Visuals");
 		//if (ImGui::TreeNode("Visible by enemy")){
 		ImGui::Checkbox("Overlay Text.", &bVBE);
@@ -154,7 +154,7 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 		}
 		if (weather_item != item_current)
 		{
-			SetWeather(item_current);
+			//SetWeather(item_current);
 		}
 		if (tempBDrawRange != bDrawRange)
 		{
@@ -162,19 +162,19 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 				rangeVal = 1200;
 			else
 				rangeVal = 0;
-			SetDrawRange(rangeVal);
+			//SetDrawRange(rangeVal);
 		}
 		if (tempBParticleHack != bParticleHack)
 		{
-			SetParticleHack(!bParticleHack);
+			//SetParticleHack(!bParticleHack);
 		}
 		if (tempBNoFog != bNoFog)
 		{
-			SetNoFog(!bNoFog);
+			//SetNoFog(!bNoFog);
 		}
 		if (tempcamDistance != camDistance)
 		{
-			SetCamDistance(camDistance);
+			//SetCamDistance(camDistance);
 
 		}
 
@@ -192,9 +192,9 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 
 DWORD WINAPI MainThread(HMODULE hModule)
 {
-	//AllocConsole();
-	//FILE* f;
-	//freopen_s(&f, "CONOUT$", "w", stdout);
+	AllocConsole();
+	FILE* f;
+	freopen_s(&f, "CONOUT$", "w", stdout);
 
 	InitHack();
 	bool init_hook = false;
@@ -213,12 +213,12 @@ DWORD WINAPI MainThread(HMODULE hModule)
 		{
 			Exit = true;
 			Sleep(1000);
-			ResetConvars();
+			//ResetConvars();
 			RemoveVmtHooks();
 			MessageBeep(MB_OK);
 			kiero::shutdown();
-			//fclose(f);
-			//FreeConsole();
+			fclose(f);
+			FreeConsole();
 			FreeLibraryAndExitThread(hModule, 0);
 		}
 	}

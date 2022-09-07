@@ -23,10 +23,10 @@ public:
 	virtual void n_9();
 	virtual void n_10();
 	virtual void ClearEntityDatabase(void); // 11
-	virtual C_BaseEntity* FindEntityProcedural(const char *...);
-	virtual C_BaseEntity* OnEntityParentChanged(C_BaseEntity*, C_BaseEntity*); //13
-	virtual C_BaseEntity* OnAddEntity(C_BaseEntity*, CEntityHandle); // 14
-	virtual C_BaseEntity* OnRemoveEntity(C_BaseEntity*, CEntityHandle); // 15
+	virtual CEntityInstance* FindEntityProcedural(const char *...);
+	virtual CEntityInstance* OnEntityParentChanged(CEntityInstance*, CEntityInstance*); //13
+	virtual CEntityInstance* OnAddEntity(CEntityInstance*, CEntityHandle); // 14
+	virtual CEntityInstance* OnRemoveEntity(CEntityInstance*, CEntityHandle); // 15
 	virtual void n_16();
 	virtual void SortEntities(int, EntitySpawnInfo_t*, int*, int*); // 17
 	virtual void n_18();

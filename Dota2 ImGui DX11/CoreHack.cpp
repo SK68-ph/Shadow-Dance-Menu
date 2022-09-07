@@ -11,7 +11,7 @@ class IEngineClient;
 VMT* entityVMT;
 CGameEntitySystem* entity;
 IEngineClient* engine;
-std::vector<C_BaseEntity*> Heroes;
+std::vector<CEntityInstance*> Heroes;
 ICvar* cvar;
 ConCommandBase* sv_cheats;
 ConCommandBase* camera_distance;
@@ -23,11 +23,11 @@ ConCommandBase* particle_hack;
 SchemaNetvarCollection* Netvars = 0;
 
 
-C_BaseEntity* OnAddEntity(CGameEntitySystem* ecx, C_BaseEntity* ptr, EntityHandle index)
+CEntityInstance* OnAddEntity(CGameEntitySystem* ecx, CEntityInstance* ptr, EntityHandle index)
 {
     auto ret = entityVMT->GetOriginalMethod(OnAddEntity)(ecx, ptr, index);
     const char* typeName = ptr->Schema_DynamicBinding()->bindingName;
-
+    
     if (strstr(typeName, "DOTA_Unit_Hero")) {
 
         auto alreadyExists = false;
@@ -43,20 +43,22 @@ C_BaseEntity* OnAddEntity(CGameEntitySystem* ecx, C_BaseEntity* ptr, EntityHandl
         if (!alreadyExists)
         {
                 int EntityIndex = index & 0x7FFF;
-                Heroes.emplace_back(ptr);
+                std::cout << typeName << " " << ptr << std::endl;
+                Heroes.push_back(ptr);
         }
     }
 
     return ret;
 }
 
-C_BaseEntity* OnRemoveEntity(CGameEntitySystem* ecx, C_BaseEntity* ptr, EntityHandle index)
+CEntityInstance* OnRemoveEntity(CGameEntitySystem* ecx, CEntityInstance* ptr, EntityHandle index)
 {
     const char* typeName = ptr->Schema_DynamicBinding()->bindingName;
 
     if (strstr(typeName, "DOTA_Unit_Hero")) {
         for (size_t i = Heroes.size(); i-- > 0; ) {
             if (Heroes[i] == ptr) {
+                std::cout << typeName << std::endl;
                 Heroes.erase(Heroes.begin() + i);
                 break;
             }
@@ -116,10 +118,12 @@ void InitSchema() {
     m_iGameMode = Netvars->Get((u64)"m_iGameMode")->offset;
     m_hReplicatingOtherHeroModel = Netvars->Get((u64)"m_hReplicatingOtherHeroModel")->offset;
     m_lifeState = Netvars->Get((u64)"m_lifeState")->offset;
+    std::cout << "vbe =" << m_flStartSequenceCycle << std::endl;
+    std::cout << "m_hOwnerEntity =" << m_hOwnerEntity << std::endl;
 }
 
 void InitHack() {
-    InitConvars();
+    //InitConvars();
     InitEntity();
     InitSchema();
 }
@@ -138,13 +142,14 @@ int localHero = -1;
 int localPlayerIndex = -1;
 int& GetLocalPlayer(int& = localPlayerIndex, int screen = 0) {
     typedef int& (*Fn)(void*, int&, int);
-    return getvfunc<Fn>(engine, 22)(engine, localPlayerIndex, screen);
+    return getvfunc<Fn>(engine, 20)(engine, localPlayerIndex, screen);
 }
 
 
 int getVBE() {
-    if (!isEntityPopulated()) // check if entity is populated
+    if (isEntityPopulated() == false) // check if entity is populated
     {
+        std::cout << "not populated" << std::endl;
         localPlayerIndex = -1;
         localHero = -1;
         return -1;
@@ -155,8 +160,10 @@ int getVBE() {
         localPlayerIndex++;
         if (localPlayerIndex == -1)
         {
+            std::cout << "localP not found" << std::endl;
             return -1;
         }
+        std::cout << "localP Index = " << localPlayerIndex << std::endl;
     }
     if (localHero == -1)
     {
@@ -165,12 +172,14 @@ int getVBE() {
             if (localPlayerIndex == Heroes[i]->OwnerIndex())
             {
                 localHero = i;
+                std::cout << "localHero = " << localPlayerIndex << std::endl;
                 break;
             }
 
         }
         if (localHero == -1)
         {
+            std::cout << "localHero not found" << std::endl;
             return -1;
         }
     }
