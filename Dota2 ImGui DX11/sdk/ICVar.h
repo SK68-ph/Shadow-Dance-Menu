@@ -3,46 +3,6 @@
 #include <array>
 #include <map>
 
-class ConCommandBase {
-public:
-    struct ConCMDID
-    {
-        static inline constexpr auto BAD_ID = 0xFFFF;
-        std::uint64_t impl{};
-
-        bool IsGood() const noexcept
-        {
-            return impl != BAD_ID;
-        }
-
-        void Invalidate() noexcept
-        {
-            impl = BAD_ID;
-        }
-    };
-    struct ConCMDRegistrationInfo
-    {
-        const char* cmd_name{};
-        const char* help_str{};
-        std::uint64_t flags{};
-        void* callback{};
-        void* unk1{};
-        void* unk2{};
-        void* unk3{};
-        void* output_id_holder{};
-    };
-    void ConCommandSource2(const std::string_view& name, const std::string_view& desc, void(*callback)(void*, const ConCMDID&))
-    {
-        ConCommandBase::ConCMDRegistrationInfo info{};
-        info.cmd_name = name.data();
-        info.help_str = desc.data();
-        info.callback = callback;
-        info.output_id_holder = this;
-        //Constructor::Invoke(&info);
-    }
-};
-
-
 class CCvar {
 public:
     enum class EConvarType : std::uint8_t
@@ -99,15 +59,18 @@ public:
     };
 
 
-    void initialize() {
+    std::map<const char*, CvarNode*>initialize() {
+        std::map<const char*, CvarNode*> list;
         CvarNode* node1 = (*(CvarNode**)this);
         for (size_t i = 0; i < 4226; i++)
         {
-            if (strcmp(node1->var->name, "dota_camera_distance") == 0)
+            if (node1->var->name)
             {
-                node1->var->value.flt = 3000.0f;
+                list.insert(std::pair<const char*, CvarNode*>(node1->var->name, node1));
             }
+            
             node1 = ((CvarNode*)((u64)node1 + 0x10));
         }
+        return list;
     }
 };

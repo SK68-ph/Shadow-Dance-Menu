@@ -13,13 +13,13 @@ CGameEntitySystem* entity;
 IEngineClient* engine;
 std::vector<CEntityInstance*> Heroes;
 CCvar* ccvar;
-ConCommandBase* sv_cheats;
-ConCommandBase* camera_distance;
-ConCommandBase* drawrange;
-ConCommandBase* r_farz;
-ConCommandBase* fog_enable;
-ConCommandBase* weather;
-ConCommandBase* particle_hack;
+CCvar::CvarNode* sv_cheats;
+CCvar::CvarNode* camera_distance;
+CCvar::CvarNode* drawrange;
+CCvar::CvarNode* r_farz;
+CCvar::CvarNode* fog_enable;
+CCvar::CvarNode* weather;
+CCvar::CvarNode* particle_hack;
 SchemaNetvarCollection* Netvars = 0;
 bool isIngame = false;
 
@@ -81,22 +81,41 @@ CEntityInstance* OnRemoveEntity(CGameEntitySystem* ecx, CEntityInstance* ptr, En
 
 void InitConvars() {
     void* ccvarr = GetInterface("tier0.dll", "VEngineCvar007");
-    void* tessst = GetInterface("engine2.dll", "Source2EngineToClient001");
-    CCvar* node = (CCvar*)((CCvar*)ccvarr +0x40);
+    CCvar* ccvar = (CCvar*)((CCvar*)ccvarr +0x40);
     
-    std::cout << "ccvar = " << node << std::endl;
-    std::cout << "tessst = " << tessst << std::endl;
-    node->initialize();
-    //std::cout << "map = " << node->testMap.size() << std::endl;
-    //std::cout << "ccnode = " << testNode << std::endl;
-    //std::cout << testNode->var->name << std::endl;
-    //sv_cheats = ccvar->FindCommandBase("sv_cheats");
-    //camera_distance = ccvar->FindC    ommandBase("dota_camera_distance");
-    //drawrange = ccvar->FindCommandBase("dota_range_display");
-    //r_farz = ccvar->FindCommandBase("r_farz");
-    //fog_enable = ccvar->FindCommandBase("fog_enable");
-    //weather = ccvar->FindCommandBase("cl_weather");
-    //particle_hack = ccvar->FindCommandBase("dota_use_particle_fow");
+    std::cout << "ccvar = " << ccvar << std::endl;
+
+    for(const auto &cvar_node : ccvar->initialize())
+    {
+        if (strcmp(cvar_node.second->var->name, "sv_cheats") == 0)
+        {
+            sv_cheats = cvar_node.second;
+        } 
+        else if (strcmp(cvar_node.second->var->name, "dota_camera_distance") == 0)
+        {
+            camera_distance = cvar_node.second;
+        } 
+        else if (strcmp(cvar_node.second->var->name, "dota_range_display") == 0)
+        {
+            drawrange = cvar_node.second;
+        } 
+        else if (strcmp(cvar_node.second->var->name, "r_farz") == 0)
+        {
+            r_farz = cvar_node.second;
+        } 
+        else if (strcmp(cvar_node.second->var->name, "fog_enable") == 0)
+        {
+            fog_enable = cvar_node.second;
+        } 
+        else if (strcmp(cvar_node.second->var->name, "cl_weather") == 0)
+        {
+            weather = cvar_node.second;
+        } 
+        else if (strcmp(cvar_node.second->var->name, "dota_use_particle_fow") == 0)
+        {
+            particle_hack = cvar_node.second;
+        }
+    }
 }
 
 void InitEntity() {
@@ -193,30 +212,30 @@ void ResetConvars()
 {
     if (ccvar != nullptr)
     {
-        //weather->SetValue(0);
-        //camera_distance->SetValue(1200);
-        //drawrange->SetValue(0);
-        //r_farz->SetValue(-1);
-        //fog_enable->SetValue(false);
-        //particle_hack->SetValue(false);
-        //sv_cheats->SetValue(0);
+        weather->var->value.i64 = (0);
+        camera_distance->var->value.flt = (1200);
+        drawrange->var->value.flt = (0);
+        r_farz->var->value.flt = (-1);
+        fog_enable->var->value.boolean = (false);
+        particle_hack->var->value.boolean = (false);
+        sv_cheats->var->value.boolean = (0);
     }
 }
 
 void SetWeather(int val) {
-    //weather->SetValue(val);
+    weather->var->value.i64 = (val);
 }
 void SetDrawRange(int val) {
-    //sv_cheats->SetValue(1);
-    //drawrange->SetValue(val);
+    sv_cheats->var->value.boolean = (1);
+    drawrange->var->value.flt = (val);
 }
 void SetParticleHack(int val) {
-    //particle_hack->SetValue(val);
+    particle_hack->var->value.boolean = (val);
 }
 void SetNoFog(int val) {
-    //fog_enable->SetValue(val);
+    fog_enable->var->value.boolean = (val);
 }
 void SetCamDistance(int val) {
-    //camera_distance->SetValue(val);			
-    //r_farz->SetValue(val * 2);
+    camera_distance->var->value.flt = (val);			
+    r_farz->var->value.flt = (val * 2);
 }

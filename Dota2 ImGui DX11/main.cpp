@@ -152,7 +152,7 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 	}
 	if (weather_item != item_current)
 	{
-		//SetWeather(item_current);
+		SetWeather(item_current);
 	}
 	if (tempBDrawRange != bDrawRange)
 	{
@@ -160,19 +160,19 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 			rangeVal = 1200;
 		else
 			rangeVal = 0;
-		//SetDrawRange(rangeVal);
+		SetDrawRange(rangeVal);
 	}
 	if (tempBParticleHack != bParticleHack)
 	{
-		//SetParticleHack(!bParticleHack);
+		SetParticleHack(!bParticleHack);
 	}
 	if (tempBNoFog != bNoFog)
 	{
-		//SetNoFog(!bNoFog);
+		SetNoFog(!bNoFog);
 	}
 	if (tempcamDistance != camDistance)
 	{
-		//SetCamDistance(camDistance);
+		SetCamDistance(camDistance);
 
 	}
 
@@ -210,7 +210,7 @@ DWORD WINAPI MainThread(HMODULE hModule)
 		{
 			Exit = true;
 			Sleep(1000);
-			//ResetConvars();
+			ResetConvars();
 			RemoveVmtHooks();
 			MessageBeep(MB_OK);
 			kiero::shutdown();
