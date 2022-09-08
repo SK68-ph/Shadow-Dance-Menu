@@ -12,7 +12,7 @@ VMT* entityVMT;
 CGameEntitySystem* entity;
 IEngineClient* engine;
 std::vector<CEntityInstance*> Heroes;
-ICvar* cvar;
+CCvar* ccvar;
 ConCommandBase* sv_cheats;
 ConCommandBase* camera_distance;
 ConCommandBase* drawrange;
@@ -51,7 +51,6 @@ CEntityInstance* OnAddEntity(CGameEntitySystem* ecx, CEntityInstance* ptr, Entit
 
         if (!alreadyExists)
         {
-                std::cout << std::hex << typeName << " " << ptr << " EntityHandle Index = " << (index &0x7FFF) << std::endl;
                 Heroes.emplace_back(ptr);
         }
     }
@@ -67,7 +66,6 @@ CEntityInstance* OnRemoveEntity(CGameEntitySystem* ecx, CEntityInstance* ptr, En
         for (size_t i = Heroes.size(); i-- > 0; ) {
             if (Heroes[i] == ptr) {
                 Heroes.erase(Heroes.begin() + i);
-                std::cout << typeName << "List count = " << Heroes.size() << std::endl;
                 if (Heroes.size() == 0)
                 {
                     localHero = -1;
@@ -82,14 +80,23 @@ CEntityInstance* OnRemoveEntity(CGameEntitySystem* ecx, CEntityInstance* ptr, En
 }
 
 void InitConvars() {
-    cvar = (ICvar*)GetInterface("tier0.dll", "VEngineCvar007");
-    sv_cheats = cvar->FindCommandBase("sv_cheats");
-    camera_distance = cvar->FindCommandBase("dota_camera_distance");
-    drawrange = cvar->FindCommandBase("dota_range_display");
-    r_farz = cvar->FindCommandBase("r_farz");
-    fog_enable = cvar->FindCommandBase("fog_enable");
-    weather = cvar->FindCommandBase("cl_weather");
-    particle_hack = cvar->FindCommandBase("dota_use_particle_fow");
+    void* ccvarr = GetInterface("tier0.dll", "VEngineCvar007");
+    void* tessst = GetInterface("engine2.dll", "Source2EngineToClient001");
+    CCvar* node = (CCvar*)((CCvar*)ccvarr +0x40);
+    
+    std::cout << "ccvar = " << node << std::endl;
+    std::cout << "tessst = " << tessst << std::endl;
+    node->initialize();
+    //std::cout << "map = " << node->testMap.size() << std::endl;
+    //std::cout << "ccnode = " << testNode << std::endl;
+    //std::cout << testNode->var->name << std::endl;
+    //sv_cheats = ccvar->FindCommandBase("sv_cheats");
+    //camera_distance = ccvar->FindC    ommandBase("dota_camera_distance");
+    //drawrange = ccvar->FindCommandBase("dota_range_display");
+    //r_farz = ccvar->FindCommandBase("r_farz");
+    //fog_enable = ccvar->FindCommandBase("fog_enable");
+    //weather = ccvar->FindCommandBase("cl_weather");
+    //particle_hack = ccvar->FindCommandBase("dota_use_particle_fow");
 }
 
 void InitEntity() {
@@ -116,15 +123,8 @@ void InitSchema() {
     Netvars->Add("C_BaseEntity", "client.dll");
     Netvars->Add("C_BaseModelEntity", "client.dll");
     Netvars->Add("C_BaseCombatCharacter", "client.dll");
-    //Netvars->Add("CGlowProperty", "client.dll");
-    //Netvars->Add("C_EconEntity", "client.dll");
-    //Netvars->Add("CAttributeContainer", "client.dll");
-    //Netvars->Add("CEconItemView", "client.dll");
-    //Netvars->Add("C_DOTAWearableItem", "client.dll");
-    //Netvars->Add("CGameSceneNode", "client.dll");
     m_iTeamNum = Netvars->Get((u64)"m_iTeamNum")->offset;
     m_hOwnerEntity = Netvars->Get((u64)"m_hOwnerEntity")->offset;
-    //m_clrRender = Netvars->Get((u64)"m_clrRender")->offset;
     m_flStartSequenceCycle = Netvars->Get((u64)"m_flStartSequenceCycle")->offset;
     m_fGameTime = Netvars->Get((u64)"m_fGameTime")->offset;
     m_nGameState = Netvars->Get((u64)"m_nGameState")->offset;
@@ -134,7 +134,7 @@ void InitSchema() {
 }
 
 void InitHack() {
-    //InitConvars();
+    InitConvars();
     InitEntity();
     InitSchema();
 }
@@ -191,32 +191,32 @@ int getVBE() {
 
 void ResetConvars()
 {
-    if (cvar != nullptr)
+    if (ccvar != nullptr)
     {
-        weather->SetValue(0);
-        camera_distance->SetValue(1200);
-        drawrange->SetValue(0);
-        r_farz->SetValue(-1);
-        fog_enable->SetValue(false);
-        particle_hack->SetValue(false);
-        sv_cheats->SetValue(0);
+        //weather->SetValue(0);
+        //camera_distance->SetValue(1200);
+        //drawrange->SetValue(0);
+        //r_farz->SetValue(-1);
+        //fog_enable->SetValue(false);
+        //particle_hack->SetValue(false);
+        //sv_cheats->SetValue(0);
     }
 }
 
 void SetWeather(int val) {
-    weather->SetValue(val);
+    //weather->SetValue(val);
 }
 void SetDrawRange(int val) {
-    sv_cheats->SetValue(1);
-    drawrange->SetValue(val);
+    //sv_cheats->SetValue(1);
+    //drawrange->SetValue(val);
 }
 void SetParticleHack(int val) {
-    particle_hack->SetValue(val);
+    //particle_hack->SetValue(val);
 }
 void SetNoFog(int val) {
-    fog_enable->SetValue(val);
+    //fog_enable->SetValue(val);
 }
 void SetCamDistance(int val) {
-    camera_distance->SetValue(val);			
-    r_farz->SetValue(val * 2);
+    //camera_distance->SetValue(val);			
+    //r_farz->SetValue(val * 2);
 }

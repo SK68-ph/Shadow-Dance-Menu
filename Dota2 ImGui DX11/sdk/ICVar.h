@@ -1,44 +1,113 @@
 ﻿#pragma once
 #include "color.h"
+#include <array>
+#include <map>
 
 class ConCommandBase {
 public:
-    virtual void DESTROY1() = 0;
-    virtual void unk() = 0;
-    virtual bool IsCommand(void) = 0;
-    virtual bool IsBoundedVar(void) = 0;
-    virtual bool IsFlagSet(long long) = 0;
-    virtual void AddFlags(long long) = 0;
-    virtual void RemoveFlags(long long) = 0;
-    virtual long long GetFlags(void) = 0;
-    virtual const char* GetName(void) = 0;
-    virtual const char* GetHelpText(void) = 0;
-    virtual bool IsRegistered(void) = 0;
-    virtual void* GetDLLIdentifier(void) = 0;
-    virtual void Create(char const*, char const*, long long) = 0;
-    virtual void Init(void) = 0;
-    virtual const char* GetBaseName(void) = 0;
-    virtual int GetSplitScreenPlayerSlot(void) = 0;
-    virtual void SetValue(char const*) = 0; // 16
-    virtual void SetValue(float) = 0; // 17
-    virtual void SetValue(int) = 0; // 18
-    virtual void SetValue(ColorRGBA) = 0;
-    virtual float GetFloat(void) = 0;
-    virtual int GetInt(void) = 0;
-    virtual bool GetBool(void) = 0;
-    virtual void InternalSetValue(char const*) = 0;
-    virtual void InternalSetFloatValue(float) = 0;
-    virtual void InternalSetIntValue(int) = 0;
-    virtual void InternalSetColorValue(ColorRGBA) = 0;
-    virtual void ClampValue(float&) = 0;
-    virtual void ChangeStringValue(char const*, float) = 0;
-    virtual void Create() = 0;
+    struct ConCMDID
+    {
+        static inline constexpr auto BAD_ID = 0xFFFF;
+        std::uint64_t impl{};
+
+        bool IsGood() const noexcept
+        {
+            return impl != BAD_ID;
+        }
+
+        void Invalidate() noexcept
+        {
+            impl = BAD_ID;
+        }
+    };
+    struct ConCMDRegistrationInfo
+    {
+        const char* cmd_name{};
+        const char* help_str{};
+        std::uint64_t flags{};
+        void* callback{};
+        void* unk1{};
+        void* unk2{};
+        void* unk3{};
+        void* output_id_holder{};
+    };
+    void ConCommandSource2(const std::string_view& name, const std::string_view& desc, void(*callback)(void*, const ConCMDID&))
+    {
+        ConCommandBase::ConCMDRegistrationInfo info{};
+        info.cmd_name = name.data();
+        info.help_str = desc.data();
+        info.callback = callback;
+        info.output_id_holder = this;
+        //Constructor::Invoke(&info);
+    }
 };
 
-class ICvar {
+
+class CCvar {
 public:
-    ConCommandBase* FindCommandBase(char const* convar) {
-        typedef ConCommandBase* (*Fn)(void*, char const*);
-        return getvfunc<Fn>(this, 16)(this, convar); // 16 in vtable
+    enum class EConvarType : std::uint8_t
+    {
+        BOOL = 0,
+        INT32,
+        UINT32,
+        INT64,
+        UINT64,
+        FLOAT,
+        DOUBLE,
+        STRING,
+        COLOR_RGBA,
+        UNK_SOME_TWO_FLOATS,
+        UNK_SOME_THREE_FLOATS,
+        UNK_SOME_FOUR_FLOATS,
+        UNK_SOME_THREE_FLOATS_AGAIN,
+    };
+
+    union ConVarValue
+    {
+        bool boolean{};
+        std::uint64_t u64a;
+        std::int64_t i64;
+        std::uint32_t u32;
+        std::int32_t i32;
+        float flt;
+        double dbl;
+        const char* str;
+        std::uint32_t clr_rgba;
+        std::array<float, 2> two_floats;
+        std::array<float, 3> three_floats;
+        std::array<float, 4> four_floats;
+    };
+
+    struct ConVariable
+    {
+        const char* name{};
+        void* next_convar_node_like_shit{};
+        void* unk1{};
+        void* unk2{};
+        const char* help{};
+        EConvarType type{};
+        int unk_maybe_number_of_times_changed{};
+        int flags{};
+        void* unk4{};
+        ConVarValue value{};
+    };
+
+    struct CvarNode
+    {
+        ConVariable* var{};
+        int some_leaf_like_index_shit{};
+    };
+
+
+    void initialize() {
+        CvarNode* node1 = (*(CvarNode**)this);
+        for (size_t i = 0; i < 4226; i++)
+        {
+            if (strcmp(node1->var->name, "dota_camera_distance") == 0)
+            {
+                node1->var->value.flt = 3000.0f;
+            }
+            node1 = ((CvarNode*)((u64)node1 + 0x10));
+        }
     }
 };
