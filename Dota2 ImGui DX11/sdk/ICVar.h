@@ -3,7 +3,7 @@
 #include <array>
 #include <map>
 
-class CCvar {
+class ICVar {
 public:
     enum class EConvarType : std::uint8_t
     {
@@ -37,7 +37,6 @@ public:
         std::array<float, 3> three_floats;
         std::array<float, 4> four_floats;
     };
-
     struct ConVariable
     {
         const char* name{};
@@ -48,7 +47,9 @@ public:
         EConvarType type{};
         int unk_maybe_number_of_times_changed{};
         int flags{};
-        void* unk4{};
+        int unk4{};
+        int CALLBACK_INDEX{};
+        int unk5{};
         ConVarValue value{};
     };
 
@@ -59,18 +60,32 @@ public:
     };
 
 
-    std::map<const char*, CvarNode*>initialize() {
-        std::map<const char*, CvarNode*> list;
-        CvarNode* node1 = (*(CvarNode**)this);
-        for (size_t i = 0; i < 4226; i++)
+    struct ConVarID
+    {
+        static inline constexpr auto BAD_ID = 0xFFFFFFFF;
+        std::uint64_t impl{};
+        void* var_ptr{};
+
+        bool IsGood() const noexcept
         {
-            if (node1->var->name)
-            {
-                list.insert(std::pair<const char*, CvarNode*>(node1->var->name, node1));
-            }
-            
-            node1 = ((CvarNode*)((u64)node1 + 0x10));
+            return impl != BAD_ID;
         }
-        return list;
+
+        void Invalidate() noexcept
+        {
+            impl = BAD_ID;
+        }
+    };
+    using t_CvarCallback = void(*)(const ConVarID& id, int unk1, const ConVarValue* val, const ConVarValue* old_val);
+
+    t_CvarCallback GetCVarCallback(int index)
+    {
+        if (index)
+        {
+            uintptr_t* table = (*(uintptr_t**)(this + 0x80));
+            if (table)
+                return *reinterpret_cast<t_CvarCallback*>(reinterpret_cast<std::uintptr_t>((void*)table) + 24 * index);
+        }
+        return nullptr;
     }
 };
