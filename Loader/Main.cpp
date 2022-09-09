@@ -68,7 +68,7 @@ wchar_t* getCurrentDir() {
 
 int wmain(int argc, wchar_t* argv[], wchar_t* envp[]) {
 	DWORD PID = GetProcId(L"dota2.exe");
-	const wchar_t* dllPath = dllPath = L"SimpleHackMenuDota2.dll";
+	const wchar_t* dllPath = dllPath = L"SimpleMenu.dll";
 	
 
 	if (PID == 0) {

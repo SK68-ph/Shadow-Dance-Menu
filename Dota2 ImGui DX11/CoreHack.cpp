@@ -11,23 +11,32 @@ class IEngineClient;
 VMT* entityVMT;
 CGameEntitySystem* entity;
 IEngineClient* engine;
-std::vector<C_BaseEntity*> Heroes;
-ICvar* cvar;
-ConCommandBase* sv_cheats;
-ConCommandBase* camera_distance;
-ConCommandBase* drawrange;
-ConCommandBase* r_farz;
-ConCommandBase* fog_enable;
-ConCommandBase* weather;
-ConCommandBase* particle_hack;
+std::vector<CEntityInstance*> Heroes;
+ICVar* VEngine;
+ICVar::CvarNode* sv_cheats;
+ICVar::CvarNode* camera_distance;
+ICVar::CvarNode* drawrange;
+ICVar::CvarNode* r_farz;
+ICVar::CvarNode* fog_enable;
+ICVar::CvarNode* weather;
+ICVar::CvarNode* particle_hack;
 SchemaNetvarCollection* Netvars = 0;
+bool isIngame = false;
 
 
-C_BaseEntity* OnAddEntity(CGameEntitySystem* ecx, C_BaseEntity* ptr, EntityHandle index)
+int localHero = -1;
+int localPlayerIndex = -1;
+int& GetLocalPlayer(int& = localPlayerIndex, int screen = 0) {
+    typedef int& (*Fn)(void*, int&, int);
+    return getvfunc<Fn>(engine, 20)(engine, localPlayerIndex, screen);
+}
+
+
+CEntityInstance* OnAddEntity(CGameEntitySystem* ecx, CEntityInstance* ptr, EntityHandle index)
 {
     auto ret = entityVMT->GetOriginalMethod(OnAddEntity)(ecx, ptr, index);
     const char* typeName = ptr->Schema_DynamicBinding()->bindingName;
-
+    
     if (strstr(typeName, "DOTA_Unit_Hero")) {
 
         auto alreadyExists = false;
@@ -42,7 +51,6 @@ C_BaseEntity* OnAddEntity(CGameEntitySystem* ecx, C_BaseEntity* ptr, EntityHandl
 
         if (!alreadyExists)
         {
-                int EntityIndex = index & 0x7FFF;
                 Heroes.emplace_back(ptr);
         }
     }
@@ -50,7 +58,7 @@ C_BaseEntity* OnAddEntity(CGameEntitySystem* ecx, C_BaseEntity* ptr, EntityHandl
     return ret;
 }
 
-C_BaseEntity* OnRemoveEntity(CGameEntitySystem* ecx, C_BaseEntity* ptr, EntityHandle index)
+CEntityInstance* OnRemoveEntity(CGameEntitySystem* ecx, CEntityInstance* ptr, EntityHandle index)
 {
     const char* typeName = ptr->Schema_DynamicBinding()->bindingName;
 
@@ -58,6 +66,11 @@ C_BaseEntity* OnRemoveEntity(CGameEntitySystem* ecx, C_BaseEntity* ptr, EntityHa
         for (size_t i = Heroes.size(); i-- > 0; ) {
             if (Heroes[i] == ptr) {
                 Heroes.erase(Heroes.begin() + i);
+                if (Heroes.size() == 0)
+                {
+                    localHero = -1;
+                    std::cout << "not populated" << std::endl;
+                }
                 break;
             }
         }
@@ -67,14 +80,42 @@ C_BaseEntity* OnRemoveEntity(CGameEntitySystem* ecx, C_BaseEntity* ptr, EntityHa
 }
 
 void InitConvars() {
-    cvar = (ICvar*)GetInterface("tier0.dll", "VEngineCvar007");
-    sv_cheats = cvar->FindCommandBase("sv_cheats");
-    camera_distance = cvar->FindCommandBase("dota_camera_distance");
-    drawrange = cvar->FindCommandBase("dota_range_display");
-    r_farz = cvar->FindCommandBase("r_farz");
-    fog_enable = cvar->FindCommandBase("fog_enable");
-    weather = cvar->FindCommandBase("cl_weather");
-    particle_hack = cvar->FindCommandBase("dota_use_particle_fow");
+    VEngine = (ICVar*)GetInterface("tier0.dll", "VEngineCvar007");
+    ICVar::CvarNode* cvarNode = (*(ICVar::CvarNode**)(VEngine + 0x40));
+
+    for (size_t i = 0; i < 4226; i++)
+    {
+        if (strcmp(cvarNode->var->name, "sv_cheats") == 0)
+        {
+            sv_cheats = cvarNode;
+        }
+        else if (strcmp(cvarNode->var->name, "dota_camera_distance") == 0)
+        {
+            camera_distance = cvarNode;
+        }
+        else if (strcmp(cvarNode->var->name, "dota_range_display") == 0)
+        {
+            drawrange = cvarNode;
+        }
+        else if (strcmp(cvarNode->var->name, "r_farz") == 0)
+        {
+            r_farz = cvarNode;
+        }
+        else if (strcmp(cvarNode->var->name, "fog_enable") == 0)
+        {
+            fog_enable = cvarNode;
+        }
+        else if (strcmp(cvarNode->var->name, "cl_weather") == 0)
+        {
+            weather = cvarNode;
+        }
+        else if (strcmp(cvarNode->var->name, "dota_use_particle_fow") == 0)
+        {
+            particle_hack = cvarNode;
+        }
+        cvarNode = ((ICVar::CvarNode*)((u64)cvarNode + 0x10));
+    }
+
 }
 
 void InitEntity() {
@@ -90,26 +131,20 @@ void InitEntity() {
     entityVMT->HookVMT(OnRemoveEntity, 15);
     entityVMT->ApplyVMT(entity);
 }
+
 void InitSchema() {
     CMsg = (ConMsg)GetProcAddress(GetModuleHandleA("tier0.dll"), "Msg");
     SchemaSystem = (u64)GetInterface("schemasystem.dll", "SchemaSystem_001");
     Netvars = new SchemaNetvarCollection;
-    Netvars->Add("C_BaseEntity", "client.dll");
-    Netvars->Add("CGameSceneNode", "client.dll");
     Netvars->Add("C_DOTA_BaseNPC", "client.dll");
     Netvars->Add("C_DOTA_BaseNPC_Hero", "client.dll");
     Netvars->Add("C_DOTABaseAbility", "client.dll");
     Netvars->Add("C_DOTAGamerules", "client.dll");
+    Netvars->Add("C_BaseEntity", "client.dll");
     Netvars->Add("C_BaseModelEntity", "client.dll");
-    Netvars->Add("CGlowProperty", "client.dll");
-    Netvars->Add("C_EconEntity", "client.dll");
-    Netvars->Add("CAttributeContainer", "client.dll");
-    Netvars->Add("CEconItemView", "client.dll");
-    Netvars->Add("C_DOTAWearableItem", "client.dll");
     Netvars->Add("C_BaseCombatCharacter", "client.dll");
     m_iTeamNum = Netvars->Get((u64)"m_iTeamNum")->offset;
     m_hOwnerEntity = Netvars->Get((u64)"m_hOwnerEntity")->offset;
-    m_clrRender = Netvars->Get((u64)"m_clrRender")->offset;
     m_flStartSequenceCycle = Netvars->Get((u64)"m_flStartSequenceCycle")->offset;
     m_fGameTime = Netvars->Get((u64)"m_fGameTime")->offset;
     m_nGameState = Netvars->Get((u64)"m_nGameState")->offset;
@@ -129,54 +164,43 @@ void RemoveVmtHooks()
     entityVMT->RevertVMT(entity); // Unhook entity
 }
 
-bool isEntityPopulated()
-{
-    return (Heroes.size() > 0);
-}
-
-int localHero = -1;
-int localPlayerIndex = -1;
-int& GetLocalPlayer(int& = localPlayerIndex, int screen = 0) {
-    typedef int& (*Fn)(void*, int&, int);
-    return getvfunc<Fn>(engine, 22)(engine, localPlayerIndex, screen);
-}
-
-
 int getVBE() {
-    if (!isEntityPopulated()) // check if entity is populated
-    {
-        localPlayerIndex = -1;
+    if (Heroes.size() == 0) {
+        //std::cout << "not populated" << std::endl;
         localHero = -1;
         return -1;
     }
-    if (localPlayerIndex == -1)
+
+    if (localHero == -1)
     {
         GetLocalPlayer(localPlayerIndex);
         localPlayerIndex++;
-        if (localPlayerIndex == -1)
-        {
-            return -1;
-        }
-    }
-    if (localHero == -1)
-    {
+        //std::cout << "local PIndex = " << localPlayerIndex << std::endl;
         for (size_t i = 0; i < Heroes.size(); i++)
         {
+            //std::cout << "current ENT = " << Heroes[i] << std::endl;
             if (localPlayerIndex == Heroes[i]->OwnerIndex())
             {
                 localHero = i;
+                //std::cout << "localHero = " << localPlayerIndex << std::endl;
                 break;
+            }
+            else
+            {
+                localHero = -1;
             }
 
         }
         if (localHero == -1)
         {
+            //std::cout << "localHero not found" << std::endl;
             return -1;
         }
+        
     }
 
     auto VBE = Heroes[localHero]->IsVisibleByEnemy(); // vbeoffset = C_BaseEntitye+0x16B0
-    if (VBE)
+    if (VBE == true)
     {
         return 0;
     }
@@ -185,32 +209,58 @@ int getVBE() {
 
 void ResetConvars()
 {
-    if (cvar != nullptr)
+    if (VEngine)
     {
-        weather->SetValue(0);
-        camera_distance->SetValue(1200);
-        drawrange->SetValue(0);
-        r_farz->SetValue(-1);
-        fog_enable->SetValue(false);
-        particle_hack->SetValue(false);
-        sv_cheats->SetValue(0);
+        weather->var->value.i64 = (0);
+        r_farz->var->value.flt = (-1.0f);
+        const auto old_val = camera_distance->var->value;
+        camera_distance->var->value.flt = (1200.0f);
+        if (auto callback = VEngine->GetCVarCallback(camera_distance->var->CALLBACK_INDEX); callback) {
+            callback(ICVar::ConVarID{ .impl = static_cast<std::uint64_t>(3293), .var_ptr = (void*)&camera_distance }, 0, &camera_distance->var->value, &old_val);
+        }
+        drawrange->var->value.flt = (0);
+        fog_enable->var->value.boolean = false;
+        particle_hack->var->value.boolean = false;
+        sv_cheats->var->value.boolean = (0);
     }
 }
 
 void SetWeather(int val) {
-    weather->SetValue(val);
+    if (weather)
+    {
+        weather->var->value.i64 = (val);
+    }
 }
 void SetDrawRange(int val) {
-    sv_cheats->SetValue(1);
-    drawrange->SetValue(val);
+    if (sv_cheats && drawrange)
+    {
+
+        sv_cheats->var->value.boolean = (1);
+        drawrange->var->value.flt = (val);
+    }
 }
 void SetParticleHack(int val) {
-    particle_hack->SetValue(val);
+    if (particle_hack)
+    {
+        particle_hack->var->value.boolean = (val);
+
+    }
 }
 void SetNoFog(int val) {
-    fog_enable->SetValue(val);
+    if (fog_enable)
+    {
+        fog_enable->var->value.boolean = (val);
+    }
 }
 void SetCamDistance(int val) {
-    camera_distance->SetValue(val);			
-    r_farz->SetValue(val * 2);
+    if (camera_distance && r_farz)
+    {
+        const auto old_val = camera_distance->var->value;
+        camera_distance->var->value.flt = (val);
+        r_farz->var->value.flt = (val * 2);
+
+        if (auto callback = VEngine->GetCVarCallback(camera_distance->var->CALLBACK_INDEX); callback) {
+            callback(ICVar::ConVarID{ .impl = static_cast<std::uint64_t>(3293), .var_ptr = (void*)&camera_distance }, 0, &camera_distance->var->value, &old_val);
+        }
+    }
 }

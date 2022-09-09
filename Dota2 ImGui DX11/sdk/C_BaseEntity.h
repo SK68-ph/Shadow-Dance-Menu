@@ -1,7 +1,7 @@
 #pragma once
 #include "utilities.h"
 
-class C_BaseEntity;
+class CEntityInstance;
 u64 m_iTeamNum, m_hOwnerEntity, m_flStartSequenceCycle, m_fGameTime, m_nGameState, m_lifeState,
 m_iGameMode, m_clrRender, m_hReplicatingOtherHeroModel;
 
@@ -21,7 +21,7 @@ public:
 };
 class CENTITYIDENTITY {
 public:
-    C_BaseEntity* entity;//0
+    CEntityInstance* entity;//0
     u64 baseinfo;//8
     CHANDLE handle;//10
 private:
@@ -33,12 +33,12 @@ public:
     CENTITYIDENTITY* m_pNext;//20
 };
 
-class C_BaseEntity
+class CEntityInstance
 {
 public:
     virtual SchemaClassBinding* Schema_DynamicBinding(void);
     CENTITYIDENTITY* identity;
-    C_BaseEntity* Next() {
+    CEntityInstance* Next() {
         if (!identity->m_pNext) return 0;
         return identity->m_pNext->entity;
     }
@@ -59,9 +59,10 @@ public:
             identity->baseinfo
             );
     }
-    short OwnerIndex()
+    int OwnerIndex()
     {
-        return (*(short*)((u64)this + m_hOwnerEntity)) & 0x7FFF;
+        std::cout << std::hex << "Owner Index = " << ((*(int*)((u64)this + m_hOwnerEntity)) & 0x7FFF) << std::endl;
+        return (*(int*)((u64)this + m_hOwnerEntity)) & 0x7FFF;
     }
     bool OfBaseClass(cc bc) {
         return StringsMatch(BaseClass(), bc);
@@ -72,12 +73,12 @@ public:
     bool IsIllusion() {
         return *(int*)((u64)this + m_hReplicatingOtherHeroModel) != -1;
     }
-    bool IsAlive() {
-        enum LifeState : int
-        {
-            UnitAlive = 0, KillCam = 1, UnitDead = 2
-        };
-        return *(int*)((u64)this + m_lifeState) == UnitAlive;
+    int IsAlive() {
+        //enum LifeState : int
+        //{
+        //    UnitAlive = 0, KillCam = 1, UnitDead = 2
+        //};
+        return *(int*)((u64)this + m_lifeState);
     }
     bool IsVisibleByEnemy() {
         float vbe = *(float*)((u64)this + m_flStartSequenceCycle);

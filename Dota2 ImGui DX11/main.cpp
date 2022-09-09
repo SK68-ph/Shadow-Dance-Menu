@@ -98,7 +98,7 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 	if (bShowMenu)
 	{
 		ImGui::PushFont(mainFont);
-		ImGui::Begin("Simple Dota2 Hack Menu");
+		ImGui::Begin("Simple Menu");
 		ImGui::Text("Visuals");
 		//if (ImGui::TreeNode("Visible by enemy")){
 		ImGui::Checkbox("Overlay Text.", &bVBE);
@@ -125,63 +125,60 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 		ImGui::PopFont();
 	}
 
-	if (isEntityPopulated())
+	if (bVBE)
 	{
-		if (bVBE)
+		ImGui::PushFont(vbeFont);
+		//ImGui::SetNextWindowSize(ImVec2(vbeFont->FontSize, vbeFont->FontSize ));
+		if (!bShowMenu)
 		{
-			ImGui::PushFont(vbeFont);
-			//ImGui::SetNextWindowSize(ImVec2(vbeFont->FontSize, vbeFont->FontSize ));
-			if (!bShowMenu)
-			{
-				ImGui::Begin("VBE", NULL, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoMove);
-			}
-			else
-			{
-				ImGui::Begin("VBE", NULL,  ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar );
-			}
-			int VBE = getVBE();
-			if (VBE == 0 && prevVbe == 0) // Visible by enemy
-			{
-				ImGui::TextColored(ImVec4(255, 0, 0, 255), "Visible");
-			}
-			else if (VBE == -1)
-			{
-				bVBE = false;
-			}
-			prevVbe = VBE;
-			ImGui::End();
-			ImGui::PopFont();
+			ImGui::Begin("VBE", NULL, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoMove);
 		}
-		if (weather_item != item_current)
+		else
 		{
-			SetWeather(item_current);
+			ImGui::Begin("VBE", NULL, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar);
 		}
-		if (tempBDrawRange != bDrawRange)
+		int VBE = getVBE();
+		if (VBE == 0 && prevVbe == 0) // Visible by enemy
 		{
-			if (bDrawRange)
-				rangeVal = 1200;
-			else
-				rangeVal = 0;
-			SetDrawRange(rangeVal);
+			ImGui::TextColored(ImVec4(255, 0, 0, 255), "Visible");
 		}
-		if (tempBParticleHack != bParticleHack)
+		else if (VBE == -1)
 		{
-			SetParticleHack(!bParticleHack);
+			bVBE = false;
 		}
-		if (tempBNoFog != bNoFog)
-		{
-			SetNoFog(!bNoFog);
-		}
-		if (tempcamDistance != camDistance)
-		{
-			SetCamDistance(camDistance);
-
-		}
-
-		tempBVBE = bVBE, tempBDrawRange = bDrawRange, tempBParticleHack = bParticleHack, tempBNoFog = bNoFog;
-		tempcamDistance = camDistance;
-		weather_item = item_current;
+		prevVbe = VBE;
+		ImGui::End();
+		ImGui::PopFont();
 	}
+	if (weather_item != item_current)
+	{
+		SetWeather(item_current);
+	}
+	if (tempBDrawRange != bDrawRange)
+	{
+		if (bDrawRange)
+			rangeVal = 1200;
+		else
+			rangeVal = 0;
+		SetDrawRange(rangeVal);
+	}
+	if (tempBParticleHack != bParticleHack)
+	{
+		SetParticleHack(!bParticleHack);
+	}
+	if (tempBNoFog != bNoFog)
+	{
+		SetNoFog(!bNoFog);
+	}
+	if (tempcamDistance != camDistance)
+	{
+		SetCamDistance(camDistance);
+
+	}
+
+	tempBVBE = bVBE, tempBDrawRange = bDrawRange, tempBParticleHack = bParticleHack, tempBNoFog = bNoFog;
+	tempcamDistance = camDistance;
+	weather_item = item_current;
 
 	ImGui::Render();
 	pContext->OMSetRenderTargets(1, &mainRenderTargetView, NULL);
