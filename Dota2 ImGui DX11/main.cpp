@@ -189,9 +189,9 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 
 DWORD WINAPI MainThread(HMODULE hModule)
 {
-	AllocConsole();
-	FILE* f;
-	freopen_s(&f, "CONOUT$", "w", stdout);
+	//AllocConsole();
+	//FILE* f;
+	//freopen_s(&f, "CONOUT$", "w", stdout);
 
 	InitHack();
 	bool init_hook = false;
@@ -214,8 +214,8 @@ DWORD WINAPI MainThread(HMODULE hModule)
 			RemoveVmtHooks();
 			MessageBeep(MB_OK);
 			kiero::shutdown();
-			fclose(f);
-			FreeConsole();
+			//fclose(f);
+			//FreeConsole();
 			FreeLibraryAndExitThread(hModule, 0);
 		}
 	}
