@@ -1,5 +1,4 @@
 #pragma once
-#include "utilities.h"
 
 class CEntityInstance;
 u64 m_iTeamNum, m_hOwnerEntity, m_flStartSequenceCycle, m_fGameTime, m_nGameState, m_lifeState,
@@ -48,30 +47,10 @@ public:
     short Index() {
         return identity->handle.Index();
     }
-    int Team() {
-        return *(int*)((u64)this + m_iTeamNum);
-    }
-    cc BaseClass() {
-        if (
-            !identity || !identity->baseinfo
-            ) return 0;
-        return **(const char***)(
-            identity->baseinfo
-            );
-    }
     int OwnerIndex()
     {
         std::cout << std::hex << "Owner Index = " << ((*(int*)((u64)this + m_hOwnerEntity)) & 0x7FFF) << std::endl;
         return (*(int*)((u64)this + m_hOwnerEntity)) & 0x7FFF;
-    }
-    bool OfBaseClass(cc bc) {
-        return StringsMatch(BaseClass(), bc);
-    }
-    bool IsHero() {
-        return OfBaseClass("C_DOTA_BaseNPC_Hero");
-    }
-    bool IsIllusion() {
-        return *(int*)((u64)this + m_hReplicatingOtherHeroModel) != -1;
     }
     int IsAlive() {
         //enum LifeState : int
@@ -87,12 +66,6 @@ public:
             return false;
         }
         return true;
-    }
-    cc name() {
-        return identity->name;
-    }
-    cc designername() {
-        return identity->designer_name;
     }
 };
 

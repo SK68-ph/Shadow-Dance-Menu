@@ -1,9 +1,9 @@
 #pragma once
 #include "CoreHack.h"
 #include "common.h"
+#include "vmt.h"
 #include "Schema.h"
 #include "sdk/CGameEntitySystem.h"
-#include "sdk/IAppSystem.h"
 #include "sdk/ICVar.h"
 
 class IEngineClient;
@@ -20,9 +20,7 @@ ICVar::CvarNode* r_farz;
 ICVar::CvarNode* fog_enable;
 ICVar::CvarNode* weather;
 ICVar::CvarNode* particle_hack;
-SchemaNetvarCollection* Netvars = 0;
-bool isIngame = false;
-
+SchemaNetvarCollection* Netvars = 0;;
 
 int localHero = -1;
 int localPlayerIndex = -1;

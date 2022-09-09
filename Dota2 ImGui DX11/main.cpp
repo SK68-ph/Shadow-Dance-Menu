@@ -86,7 +86,6 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 		bShowMenu = !bShowMenu;
 	}
 
-	//temporary vars
 	int tempBVBE = -1, tempBDrawRange = -1, tempBParticleHack = -1, tempBNoFog = -1;
 	int tempcamDistance = -1;
 	int weather_item = -1;
@@ -94,17 +93,12 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
 
-	//Menu logic
 	if (bShowMenu)
 	{
 		ImGui::PushFont(mainFont);
 		ImGui::Begin("Simple Menu");
 		ImGui::Text("Visuals");
-		//if (ImGui::TreeNode("Visible by enemy")){
 		ImGui::Checkbox("Overlay Text.", &bVBE);
-		//ImGui::Checkbox("Particle.(Soon)", &bVBEParticle);
-		//ImGui::TreePop();
-		//}
 		ImGui::Checkbox("Draw Blink Dagger Circle Range.", &bDrawRange);
 		ImGui::Text("CameraDistance");
 		ImGui::SliderInt("", &camDistance, 0, 3000, "%d");

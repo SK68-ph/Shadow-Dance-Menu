@@ -1,7 +1,7 @@
 ﻿#pragma once
-#include "color.h"
 #include <array>
 #include <map>
+
 
 class ICVar {
 public:
@@ -76,15 +76,15 @@ public:
             impl = BAD_ID;
         }
     };
-    using t_CvarCallback = void(*)(const ConVarID& id, int unk1, const ConVarValue* val, const ConVarValue* old_val);
+    using CvarCallBack = void(*)(const ConVarID& id, int unk1, const ConVarValue* val, const ConVarValue* old_val);
 
-    t_CvarCallback GetCVarCallback(int index)
+    CvarCallBack GetCVarCallback(int index)
     {
         if (index)
         {
             uintptr_t* table = (*(uintptr_t**)(this + 0x80));
             if (table)
-                return *reinterpret_cast<t_CvarCallback*>(reinterpret_cast<std::uintptr_t>((void*)table) + 24 * index);
+                return *reinterpret_cast<CvarCallBack*>(reinterpret_cast<std::uintptr_t>((void*)table) + 24 * index);
         }
         return nullptr;
     }
