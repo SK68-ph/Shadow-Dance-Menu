@@ -163,7 +163,6 @@
     <ClCompile Include="kiero\minhook\src\hook.c" />
     <ClCompile Include="kiero\minhook\src\trampoline.c" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="utilities.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="kiero\minhook\dll_resources\MinHook.def" />
@@ -196,11 +195,7 @@
     <ClInclude Include="Schema.h" />
     <ClInclude Include="sdk\C_BaseEntity.h" />
     <ClInclude Include="sdk\CGameEntitySystem.h" />
-    <ClInclude Include="sdk\color.h" />
-    <ClInclude Include="sdk\Convar.h" />
-    <ClInclude Include="sdk\IAppSystem.h" />
     <ClInclude Include="sdk\ICVar.h" />
-    <ClInclude Include="utilities.h" />
     <ClInclude Include="vmt.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

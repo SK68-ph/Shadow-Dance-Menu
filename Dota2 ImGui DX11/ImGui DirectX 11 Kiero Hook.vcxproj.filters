@@ -72,9 +72,6 @@
     <ClCompile Include="imgui\droidSans.h">
       <Filter>imgui</Filter>
     </ClCompile>
-    <ClCompile Include="utilities.cpp">
-      <Filter>Utils</Filter>
-    </ClCompile>
     <ClCompile Include="CoreHack.cpp">
       <Filter>Hack</Filter>
     </ClCompile>
@@ -142,20 +139,11 @@
     <ClInclude Include="imgui\vbeFont.h">
       <Filter>imgui</Filter>
     </ClInclude>
-    <ClInclude Include="utilities.h">
-      <Filter>Utils</Filter>
-    </ClInclude>
     <ClInclude Include="CoreHack.h">
       <Filter>Hack</Filter>
     </ClInclude>
     <ClInclude Include="common.h">
       <Filter>Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="sdk\color.h">
-      <Filter>sdk</Filter>
-    </ClInclude>
-    <ClInclude Include="sdk\IAppSystem.h">
-      <Filter>sdk</Filter>
     </ClInclude>
     <ClInclude Include="sdk\ICVar.h">
       <Filter>sdk</Filter>
@@ -167,9 +155,6 @@
       <Filter>sdk</Filter>
     </ClInclude>
     <ClInclude Include="sdk\CGameEntitySystem.h">
-      <Filter>sdk</Filter>
-    </ClInclude>
-    <ClInclude Include="sdk\Convar.h">
       <Filter>sdk</Filter>
     </ClInclude>
     <ClInclude Include="Schema.h">
