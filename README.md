@@ -20,7 +20,7 @@ Press End to exit hack.
 
 <summary>Features</summary>
  
-- Display overlay if visible by enemy team(hero,creeps,towers etc..)
+- Display overlay if visible by enemy team(hero,creeps,towers etc..) it functions similarly to Shadow Dance Passive(Slark ulti)
  
 - Draw blink dagger range
  
