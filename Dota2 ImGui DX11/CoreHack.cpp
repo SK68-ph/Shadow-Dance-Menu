@@ -5,6 +5,8 @@
 #include "Schema.h"
 #include "sdk/CGameEntitySystem.h"
 #include "sdk/ICVar.h"
+#include <set>
+#include <deque>
 
 class IEngineClient;
 
@@ -162,9 +164,24 @@ void RemoveVmtHooks()
     entityVMT->RevertVMT(entity); // Unhook entity
 }
 
+
+int threshold = 6;
+std::deque<float> duplicates;
+
+int unique_num() {
+    std::set<float> nums;
+    for (auto var : duplicates)
+    {
+        std::cout << "duplicate =" << var << std::endl;
+        nums.insert(var);
+    }
+
+    std::cout << "unique size =" << nums.size() << std::endl;
+    return nums.size();
+}
+
 int getVBE() {
     if (Heroes.size() == 0) {
-        //std::cout << "not populated" << std::endl;
         localHero = -1;
         return -1;
     }
@@ -173,14 +190,11 @@ int getVBE() {
     {
         GetLocalPlayer(localPlayerIndex);
         localPlayerIndex++;
-        //std::cout << "local PIndex = " << localPlayerIndex << std::endl;
         for (size_t i = 0; i < Heroes.size(); i++)
         {
-            //std::cout << "current ENT = " << Heroes[i] << std::endl;
             if (localPlayerIndex == Heroes[i]->OwnerIndex())
             {
                 localHero = i;
-                //std::cout << "localHero = " << localPlayerIndex << std::endl;
                 break;
             }
             else
@@ -191,14 +205,18 @@ int getVBE() {
         }
         if (localHero == -1)
         {
-            //std::cout << "localHero not found" << std::endl;
             return -1;
         }
         
     }
 
-    auto VBE = Heroes[localHero]->IsVisibleByEnemy(); // vbeoffset = C_BaseEntitye+0x16B0
-    if (VBE == true)
+    auto VBE = Heroes[localHero]->IsVisibleByEnemy();
+
+    duplicates.push_front(VBE);
+    if (duplicates.size() == threshold + 1)
+        duplicates.pop_back();
+
+    if (unique_num() < 2)
     {
         return 0;
     }
@@ -213,13 +231,13 @@ void ResetConvars()
         r_farz->var->value.flt = (-1.0f);
         const auto old_val = camera_distance->var->value;
         camera_distance->var->value.flt = (1200.0f);
+        fog_enable->var->value.boolean = true;
+        particle_hack->var->value.boolean = false;
+        drawrange->var->value.flt = (0);
+        sv_cheats->var->value.boolean = (0);
         if (auto callback = VEngine->GetCVarCallback(camera_distance->var->CALLBACK_INDEX); callback) {
             callback(ICVar::ConVarID{ .impl = static_cast<std::uint64_t>(3293), .var_ptr = (void*)&camera_distance }, 0, &camera_distance->var->value, &old_val);
         }
-        drawrange->var->value.flt = (0);
-        fog_enable->var->value.boolean = false;
-        particle_hack->var->value.boolean = false;
-        sv_cheats->var->value.boolean = (0);
     }
 }
 

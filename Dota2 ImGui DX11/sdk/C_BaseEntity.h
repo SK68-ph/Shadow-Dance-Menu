@@ -49,7 +49,6 @@ public:
     }
     int OwnerIndex()
     {
-        std::cout << std::hex << "Owner Index = " << ((*(int*)((u64)this + m_hOwnerEntity)) & 0x7FFF) << std::endl;
         return (*(int*)((u64)this + m_hOwnerEntity)) & 0x7FFF;
     }
     int IsAlive() {
@@ -59,13 +58,8 @@ public:
         //};
         return *(int*)((u64)this + m_lifeState);
     }
-    bool IsVisibleByEnemy() {
-        float vbe = *(float*)((u64)this + m_flStartSequenceCycle);
-        if (vbe >= 0.001 && vbe <= 1)
-        {
-            return false;
-        }
-        return true;
+    float IsVisibleByEnemy() {
+        return *(float*)((u64)this + m_flStartSequenceCycle);
     }
 };
 
