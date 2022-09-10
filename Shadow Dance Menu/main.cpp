@@ -93,7 +93,7 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 	if (bShowMenu)
 	{
 		ImGui::PushFont(mainFont);
-		ImGui::Begin("Simple Menu");
+		ImGui::Begin("Shadow Dance Menu");
 		ImGui::Text("Visuals");
 		ImGui::Checkbox("Overlay Text.", &bVBE);
 		ImGui::Checkbox("Draw Blink Dagger Circle Range.", &bDrawRange);
@@ -112,6 +112,8 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 		ImGui::Text("Hacks");
 		ImGui::Checkbox("No Map Fog.", &bNoFog);
 		ImGui::Checkbox("Particle Map Hack.", &bParticleHack);
+		ImGui::Dummy(ImVec2(1, 20));
+		ImGui::Text("@SK68-ph");
 		ImGui::End();
 		ImGui::PopFont();
 	}

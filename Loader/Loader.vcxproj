@@ -74,7 +74,7 @@
     <TargetName>SimpleHackMenuDota2Loader</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <TargetName>MenuLoader</TargetName>
+    <TargetName>ShadowDanceLoader</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
