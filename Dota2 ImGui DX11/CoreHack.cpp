@@ -172,11 +172,8 @@ int unique_num() {
     std::set<float> nums;
     for (auto var : duplicates)
     {
-        std::cout << "duplicate =" << var << std::endl;
         nums.insert(var);
     }
-
-    std::cout << "unique size =" << nums.size() << std::endl;
     return nums.size();
 }
 
@@ -232,7 +229,7 @@ void ResetConvars()
         const auto old_val = camera_distance->var->value;
         camera_distance->var->value.flt = (1200.0f);
         fog_enable->var->value.boolean = true;
-        particle_hack->var->value.boolean = false;
+        particle_hack->var->value.boolean = true;
         drawrange->var->value.flt = (0);
         sv_cheats->var->value.boolean = (0);
         if (auto callback = VEngine->GetCVarCallback(camera_distance->var->CALLBACK_INDEX); callback) {
