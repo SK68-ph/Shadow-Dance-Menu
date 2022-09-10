@@ -36,20 +36,17 @@ LRESULT __stdcall WndProc(const HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 	return CallWindowProc(oWndProc, hWnd, uMsg, wParam, lParam);
 }
 
-// Features Vars
+// ImGui Menu Vars
+bool bMenuInit = false, bMenuExit = false, bShowMenu = true;
 bool bVBE = false, bVBEParticle = false, bDrawRange = false, bParticleHack = false, bNoFog = false;
 const char* weatherList[] = { "Default", "Winter", " Rain", "MoonBeam", "Pestilence", "Harvest", "Sirocco", "Spring", "Ash", "Aurora" };
 int camDistance = 1200, rangeVal = 1200;
-int prevVbe;
 int item_current = 0;
-
-// Imgui Vars
-bool init = false, Exit = false, bShowMenu = true;
 
 HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT Flags)
 {
 
-	if (Exit == true)
+	if (bMenuExit == true)
 	{
 		pDevice->Release();
 		pContext->Release();
@@ -59,7 +56,7 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 		return 0;
 	}
 
-	if (!init)
+	if (!bMenuInit)
 	{
 		if (SUCCEEDED(pSwapChain->GetDevice(__uuidof(ID3D11Device), (void**)& pDevice)))
 		{
@@ -74,7 +71,7 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 			oWndProc = (WNDPROC)SetWindowLongPtr(window, GWLP_WNDPROC, (LONG_PTR)WndProc);
 			InitImGui();
 			IM_ASSERT(ImGui::GetCurrentContext() != NULL && "Missing dear imgui context. Refer to examples app!");
-			init = true;
+			bMenuInit = true;
 		}
 
 		else
@@ -132,7 +129,8 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 			ImGui::Begin("VBE", NULL, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar);
 		}
 		int VBE = getVBE();
-		if (VBE == 0 && prevVbe == 0) // Visible by enemy
+
+		if (VBE == 0) // Visible by enemy
 		{
 			ImGui::TextColored(ImVec4(255, 0, 0, 255), "Visible");
 		}
@@ -140,7 +138,6 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 		{
 			bVBE = false;
 		}
-		prevVbe = VBE;
 		ImGui::End();
 		ImGui::PopFont();
 	}
@@ -198,11 +195,11 @@ DWORD WINAPI MainThread(HMODULE hModule)
 		}
 	} while (!init_hook);
 	MessageBeep(MB_OK);
-	while (Exit == false)
+	while (bMenuExit == false)
 	{
 		if (GetAsyncKeyState(VK_END) & 1)
 		{
-			Exit = true;
+			bMenuExit = true;
 			Sleep(1000);
 			ResetConvars();
 			RemoveVmtHooks();
