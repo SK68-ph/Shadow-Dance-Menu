@@ -1,6 +1,6 @@
 # Shadow Dance Menu for dota2
 
-An Internal ImGui menu with a few features. 
+An Internal ImGui based menu with a few features. 
 
 Note:
 This program is made for educational purposes only. Run dota2 in offline mode to test.
