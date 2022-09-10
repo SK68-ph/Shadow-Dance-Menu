@@ -1,3 +1,3 @@
-# Simple Hack Menu Dota-2
+# Shadow Dance Menu for dota2
 
  
