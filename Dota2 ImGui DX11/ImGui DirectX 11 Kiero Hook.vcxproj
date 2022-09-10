@@ -155,6 +155,7 @@
     <ClCompile Include="imgui\imgui_draw.cpp" />
     <ClCompile Include="imgui\imgui_impl_dx11.cpp" />
     <ClCompile Include="imgui\imgui_impl_win32.cpp" />
+    <ClCompile Include="imgui\imgui_tables.cpp" />
     <ClCompile Include="imgui\imgui_widgets.cpp" />
     <ClCompile Include="kiero\kiero.cpp" />
     <ClCompile Include="kiero\minhook\src\buffer.c" />
@@ -184,6 +185,7 @@
     <ClInclude Include="imgui\vbeFont.h" />
     <ClInclude Include="includes.h" />
     <ClInclude Include="kiero\kiero.h" />
+    <ClInclude Include="kiero\minhook\dll_resources\resource.h" />
     <ClInclude Include="kiero\minhook\include\MinHook.h" />
     <ClInclude Include="kiero\minhook\src\buffer.h" />
     <ClInclude Include="kiero\minhook\src\hde\hde32.h" />

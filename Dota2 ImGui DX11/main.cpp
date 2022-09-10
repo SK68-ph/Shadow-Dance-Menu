@@ -98,7 +98,7 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 		ImGui::Checkbox("Overlay Text.", &bVBE);
 		ImGui::Checkbox("Draw Blink Dagger Circle Range.", &bDrawRange);
 		ImGui::Text("CameraDistance");
-		ImGui::SliderInt("", &camDistance, 0, 3000, "%d");
+		ImGui::SliderInt("##slider", &camDistance, 0, 3000, "%d");
 		ImGui::SameLine();
 		if (ImGui::Button("Reset", ImVec2(70, 20))) {
 			camDistance = 1200;
@@ -106,7 +106,7 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 
 		ImGui::Dummy(ImVec2(1, 10));
 		ImGui::Text("Weather");
-		ImGui::ListBox("", &item_current, weatherList, IM_ARRAYSIZE(weatherList), 4);
+		ImGui::ListBox("##list", &item_current, weatherList, IM_ARRAYSIZE(weatherList), 4);
 
 		ImGui::Dummy(ImVec2(1,20));
 		ImGui::Text("Hacks");

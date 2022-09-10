@@ -75,6 +75,9 @@
     <ClCompile Include="CoreHack.cpp">
       <Filter>Hack</Filter>
     </ClCompile>
+    <ClCompile Include="imgui\imgui_tables.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="kiero\minhook\dll_resources\MinHook.rc">
@@ -159,6 +162,9 @@
     </ClInclude>
     <ClInclude Include="Schema.h">
       <Filter>Hack</Filter>
+    </ClInclude>
+    <ClInclude Include="kiero\minhook\dll_resources\resource.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
