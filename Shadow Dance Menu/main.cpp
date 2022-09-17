@@ -121,14 +121,13 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 	if (bVBE)
 	{
 		ImGui::PushFont(vbeFont);
-		//ImGui::SetNextWindowSize(ImVec2(vbeFont->FontSize, vbeFont->FontSize ));
 		if (!bShowMenu)
 		{
 			ImGui::Begin("VBE", NULL, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoMove);
 		}
 		else
 		{
-			ImGui::Begin("VBE", NULL, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar);
+			ImGui::Begin("VBE", NULL,  ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar);
 		}
 		int VBE = getVBE();
 
@@ -140,6 +139,7 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 		{
 			bVBE = false;
 		}
+		ImGui::Dummy(ImVec2(1, 15));
 		ImGui::End();
 		ImGui::PopFont();
 	}
